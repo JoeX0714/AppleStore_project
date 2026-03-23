@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>登录 Apple Store</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/register.css" />
+  </head>
+  <body>
+    <nav class="apple-nav">
+      <div class="container">
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="index.html" id="nav-logo" class="nav-logo">
+              <img src="../images/Apple-Logo.png" alt="Apple Logo" />
+            </a>
+          </li>
+
+          <li class="nav-item dropdown-parent">
+            <a href="index.html">商店</a>
+            <ul class="dropdown-menu">
+              <li><a href="index.html?tab=mac">Mac</a></li>
+              <li><a href="index.html?tab=ipad">iPad</a></li>
+              <li><a href="index.html?tab=iphone">iPhone</a></li>
+              <li class="nav-item"><a href="index.html?tab=watch">Watch</a></li>
+              <li class="nav-item"><a href="index.html?tab=airpods">AirPods</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item"><a href="index.html?tab=mac">Mac</a></li>
+          <li class="nav-item"><a href="index.html?tab=ipad">iPad</a></li>
+          <li class="nav-item"><a href="index.html?tab=iphone">iPhone</a></li>
+          <li class="nav-item"><a href="index.html?tab=watch">Watch</a></li>
+          <li class="nav-item"><a href="index.html?tab=airpods">AirPods</a></li>
+          <li class="nav-item" id="nav-login"><a href="login.html">登录</a></li>
+          <li class="nav-item auth-hidden" id="nav-user">
+            <a href="javascript:void(0)" class="nav-avatar-link" aria-label="已登录用户">
+              <svg class="nav-avatar-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"></path>
+              </svg>
+            </a>
+          </li>
+          <li class="nav-item" id="nav-register"><a href="register.html">注册</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="login-page">
+      <section class="login-container">
+        <h1 class="main-title">现在登录，结账更快捷。</h1>
+
+        <div class="login-box">
+          <h2 class="sub-title">登录 Apple Store</h2>
+
+          <form id="login-form">
+            <div class="input-wrapper">
+              <input
+                type="text"
+                placeholder="电子邮件或电话号码"
+                id="apple-id-input"
+                required
+              />
+              <button type="submit" class="arrow-btn" aria-label="继续">
+                <svg viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M15,0C6.7,0,0,6.7,0,15s6.7,15,15,15s15-6.7,15-15S23.3,0,15,0z M20.7,15.5l-6,6c-0.3,0.3-0.7,0.3-1,0s-0.3-0.7,0-1l4.8-4.8H9c-0.4,0-0.7-0.3-0.7-0.7s0.3-0.7,0.7-0.7h9.5l-4.8-4.8c-0.3-0.3-0.3-0.7,0-1s0.7-0.3,1,0l6,6C21,14.8,21,15.2,20.7,15.5z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+
+            <div class="input-wrapper hidden" id="password-wrapper">
+              <input
+                type="password"
+                placeholder="密码"
+                id="login-password-input"
+              />
+            </div>
+          </form>
+
+          <p id="login-tip" class="form-tip"></p>
+
+          <p class="helper-text">
+            没有账户？<a href="register.html">创建你的账户</a>
+          </p>
+        </div>
+      </section>
+    </main>
+    <script>
+      const loginForm = document.getElementById("login-form");
+      const accountInput = document.getElementById("apple-id-input");
+      const passwordWrapper = document.getElementById("password-wrapper");
+      const passwordInput = document.getElementById("login-password-input");
+      const loginTip = document.getElementById("login-tip");
+      const API_BASE = "http://127.0.0.1:3100";
+      let verifiedAccount = "";
+      initAuthNav();
+
+      function normalizeAccount(value) {
+        const trimmed = value.trim();
+        return trimmed.includes("@")
+          ? trimmed.toLowerCase()
+          : trimmed.replace(/\s+/g, "");
+      }
+
+      function setTip(message, type) {
+        loginTip.textContent = message;
+        loginTip.className = "form-tip " + type;
+      }
+
+      async function postJson(url, payload) {
+        const response = await fetch(`${API_BASE}${url}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const text = await response.text();
+        let data = {};
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch (_error) {
+            data = { message: "服务响应格式异常，请重试" };
+          }
+        }
+        return { ok: response.ok, data };
+      }
+
+      accountInput.addEventListener("input", () => {
+        const currentAccount = normalizeAccount(accountInput.value);
+        if (verifiedAccount && currentAccount !== verifiedAccount) {
+          verifiedAccount = "";
+          passwordWrapper.classList.add("hidden");
+          passwordInput.value = "";
+          passwordInput.required = false;
+          setTip("", "");
+        }
+      });
+
+      loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const account = normalizeAccount(accountInput.value);
+
+        if (!verifiedAccount) {
+          try {
+            const { ok, data } = await postJson("/api/auth/check-account", { account });
+            if (!ok || !data.exists) {
+              setTip(data.message || "电子邮件或电话号码有误", "error");
+              return;
+            }
+
+            verifiedAccount = account;
+            passwordWrapper.classList.remove("hidden");
+            passwordInput.required = true;
+            passwordInput.focus();
+            setTip(data.message || "账号已验证，请输入密码", "success");
+          } catch (_error) {
+            setTip("网络异常，请稍后重试", "error");
+          }
+          return;
+        }
+
+        try {
+          const { ok, data } = await postJson("/api/login", {
+            account: verifiedAccount,
+            password: passwordInput.value,
+          });
+
+          if (!ok) {
+            setTip(data.message || "密码错误，请重试", "error");
+            return;
+          }
+
+          localStorage.setItem("appleStoreAccount", verifiedAccount);
+          initAuthNav();
+          setTip(data.message || "登录成功", "success");
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 500);
+        } catch (_error) {
+          setTip("网络异常，请稍后重试", "error");
+        }
+      });
+
+      function initAuthNav() {
+        const navLogin = document.getElementById("nav-login");
+        const navRegister = document.getElementById("nav-register");
+        const navUser = document.getElementById("nav-user");
+        const userLink = navUser ? navUser.querySelector("a") : null;
+        const account = localStorage.getItem("appleStoreAccount");
+
+        if (!navLogin || !navRegister || !navUser) {
+          return;
+        }
+
+        if (account) {
+          navLogin.classList.add("auth-hidden");
+          navRegister.classList.add("auth-hidden");
+          navUser.classList.remove("auth-hidden");
+          if (userLink) {
+            userLink.title = `已登录：${account}`;
+          }
+          return;
+        }
+
+        navLogin.classList.remove("auth-hidden");
+        navRegister.classList.remove("auth-hidden");
+        navUser.classList.add("auth-hidden");
+      }
+    </script>
+  </body>
+</html>

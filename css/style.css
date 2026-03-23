@@ -1,0 +1,765 @@
+/* 基础重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+body {
+  background-color: #ffffff;
+}
+
+/* 导航栏容器 */
+.apple-nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 44px;
+  background: #ffffff;
+  z-index: 9999;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.nav-list {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  list-style: none;
+  height: 100%;
+  padding: 0 20px;
+}
+
+/* --- 修改点 1：一级导航字体变大加粗 --- */
+.nav-item a {
+  text-decoration: none;
+  color: #1d1d1f;
+  font-size: 14px; /* 从 12px 增加到 14px */
+  font-weight: 500; /* 设置为中等加粗 */
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+
+.nav-item a:hover {
+  opacity: 1;
+}
+
+.auth-hidden {
+  display: none !important;
+}
+
+.nav-avatar-link {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+}
+
+.nav-avatar-icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #1d1d1f;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#nav-user {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.user-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 160px;
+  background-color: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  padding: 12px 0;
+  border-radius: 0 0 8px 8px;
+  z-index: 1200;
+}
+
+#nav-user:hover .user-menu,
+#nav-user:focus-within .user-menu {
+  display: block;
+}
+
+.user-menu li button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d1d1f;
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+.user-menu li button:hover {
+  background: #f5f5f7;
+  opacity: 1;
+}
+
+.account-page {
+  max-width: 880px;
+  margin: 88px auto 30px;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e6e6e8;
+  padding: 24px;
+}
+
+.account-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.account-page-header h2 {
+  font-size: 26px;
+  color: #1d1d1f;
+}
+
+.account-back-btn {
+  border: none;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border-radius: 12px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.account-list {
+  display: grid;
+  gap: 12px;
+}
+
+.cart-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid #e7e7ea;
+  border-radius: 12px;
+  background: #fafafc;
+}
+
+.cart-select-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #1d1d1f;
+}
+
+.cart-summary {
+  font-size: 14px;
+  color: #1d1d1f;
+}
+
+.cart-item-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #6e6e73;
+}
+
+.buy-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.account-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e7e7ea;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.item-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.item-meta {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #6e6e73;
+}
+
+.empty-tip {
+  color: #6e6e73;
+  font-size: 14px;
+}
+
+.password-form {
+  display: grid;
+  gap: 10px;
+  max-width: 380px;
+}
+
+.password-form input {
+  border: 1px solid #d2d2d7;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.password-page {
+  max-width: 760px;
+  margin: 110px auto 40px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 8px 24px;
+}
+
+.password-page .account-page-header {
+  justify-content: center;
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.password-page .account-page-header h2 {
+  font-size: 42px;
+  line-height: 1.1;
+}
+
+.password-page .account-back-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.password-page .password-form {
+  max-width: 560px;
+  margin: 0 auto;
+  gap: 14px;
+}
+
+.password-page .password-form input {
+  height: 52px;
+  font-size: 17px;
+  border-radius: 14px;
+}
+
+.password-page .password-form .buy-btn {
+  height: 50px;
+  font-size: 18px;
+  border-radius: 14px;
+}
+
+.password-page #password-tip {
+  text-align: center;
+  font-size: 16px;
+  margin-top: 14px;
+}
+
+.nav-logo img {
+  height: 20px;
+  width: auto;
+  vertical-align: middle;
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+
+.nav-logo img:hover {
+  opacity: 1;
+}
+
+/* 二级菜单父级 */
+.dropdown-parent {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* 二级菜单容器 */
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(255, 255, 255, 0.98);
+  min-width: 160px; /* 稍微加宽以适应大字体 */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  padding: 12px 0;
+  list-style: none;
+  border-radius: 0 0 8px 8px;
+  z-index: 1000;
+  margin-top: -1px;
+}
+
+/* --- 修改点 2：二级菜单选项加粗变大 --- */
+.dropdown-menu li {
+  padding: 12px 24px; /* 增加间距感 */
+  text-align: left;
+}
+
+.dropdown-menu li a {
+  color: #1d1d1f !important;
+  font-size: 16px !important; /* 从 14px 增加到 16px */
+  font-weight: 600 !important; /* 显著加粗 */
+  opacity: 0.9;
+  white-space: nowrap;
+  display: block;
+}
+
+.dropdown-parent:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-menu li:hover {
+  background-color: #f5f5f7;
+}
+
+.dropdown-menu li:hover a {
+  opacity: 1;
+}
+
+/* 英雄区展示样式 */
+.hero {
+  margin-top: 44px;
+  padding-top: 100px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 56px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.hero p {
+  font-size: 28px;
+  margin-top: 6px;
+}
+
+.cta {
+  margin-top: 18px;
+}
+
+.cta .link {
+  color: #0066cc;
+  text-decoration: none;
+  font-size: 21px;
+  margin: 0 15px;
+}
+
+.cta .link:hover {
+  text-decoration: underline;
+}
+/* 价格和分期信息的容器 */
+.price-info {
+  margin: 15px 0;
+  min-height: 60px; /* 统一高度防止错位 */
+}
+
+.installment {
+  font-size: 12px;
+  color: #1d1d1f;
+  margin-bottom: 4px;
+}
+
+.price {
+  font-size: 14px;
+  color: #1d1d1f;
+  font-weight: 400;
+}
+
+/* 颜色选择器圆点 */
+.color-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 15px 0;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.dot.active {
+  outline: 1px solid #0071e3;
+  outline-offset: 2px;
+}
+
+/* 购买按钮美化 (蓝色药丸状) */
+.buy-btn {
+  background-color: #0071e3;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.buy-btn:hover {
+  background-color: #0077ed;
+}
+/* --- Mac 页面顶部区域专属样式 --- */
+
+/* 1. 给整个 Mac 页面加上 Apple 标志性的浅灰背景 */
+#mac-page {
+  background-color: #f5f5f7;
+  padding-bottom: 60px; /* 底部留点白 */
+}
+
+#iPad-page {
+  background-color: #f5f5f7;
+  padding-bottom: 60px; /* 底部留点白 */
+}
+
+#iphone-page {
+  background-color: #f5f5f7;
+  padding-bottom: 60px;
+}
+
+#watch-page {
+  background-color: #f5f5f7;
+  padding-bottom: 60px;
+}
+
+#airpods-page {
+  background-color: #f5f5f7;
+  padding-bottom: 60px;
+}
+
+/* 限制内容最大宽度并居中，和下面的产品卡片对齐 */
+.mac-page-header,
+.mac-selection {
+  max-width: 1200px; /* 根据你网页的实际情况可微调 */
+  margin: 0 auto;
+  padding: 60px 20px 20px;
+}
+
+.iPad-page-header,
+.iPad-selection {
+  max-width: 1200px; /* 根据你网页的实际情况可微调 */
+  margin: 0 auto;
+  padding: 60px 20px 20px;
+}
+
+#watch-page .iPad-page-header {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 20px 20px;
+}
+
+/* 2. 超大号主标题 */
+.huge-title {
+  font-size: 48px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 40px;
+  letter-spacing: -0.01em; /* 稍微收紧一点字间距，更有质感 */
+}
+
+/* 3. 二级导航菜单排版 */
+.mac-sub-nav {
+  list-style: none; /* 去掉前面的小黑点 */
+  padding: 0;
+  margin: 0 0 50px 0;
+  display: flex; /* 横向排列 */
+  flex-wrap: nowrap;
+  gap: 30px; /* 选项之间的间距 */
+  overflow-x: auto; /* 屏幕小的时候允许左右滑动 */
+}
+
+.iPad-sub-nav {
+  list-style: none; /* 去掉前面的小黑点 */
+  padding: 0;
+  margin: 0 0 50px 0;
+  display: flex; /* 横向排列 */
+  flex-wrap: nowrap;
+  gap: 30px; /* 选项之间的间距 */
+  overflow-x: auto; /* 屏幕小的时候允许左右滑动 */
+}
+
+.mac-sub-nav li a {
+  text-decoration: none; /* 去掉下划线 */
+  color: #1d1d1f;
+  font-size: 14px;
+  padding-bottom: 6px;
+  white-space: nowrap; /* 不换行 */
+}
+
+.iPad-sub-nav li a {
+  text-decoration: none; /* 去掉下划线 */
+  color: #1d1d1f;
+  font-size: 14px;
+  padding-bottom: 6px;
+  white-space: nowrap; /* 不换行 */
+}
+
+.mac-sub-nav li a:hover {
+  color: #0071e3; /* 鼠标放上去变蓝 */
+}
+
+.iPad-sub-nav li a:hover {
+  color: #0071e3; /* 鼠标放上去变蓝 */
+}
+
+/* 当前选中的菜单项（带底部细线） */
+.mac-sub-nav li a.active {
+  border-bottom: 1px solid #1d1d1f;
+  font-weight: 600;
+}
+
+.iPad-sub-nav li a.active {
+  border-bottom: 1px solid #1d1d1f;
+  font-weight: 600;
+}
+
+/* 4. 副标题双色效果 */
+.mac-page-header .sub-title {
+  font-size: 28px;
+  margin-bottom: 30px;
+  font-weight: 500;
+}
+
+.iPad-page-header .sub-title {
+  font-size: 28px;
+  margin-bottom: 30px;
+  font-weight: 500;
+}
+
+.mac-page-header .sub-title .dark-text {
+  color: #1d1d1f;
+}
+
+.iPad-page-header .sub-title .dark-text {
+  color: #1d1d1f;
+}
+
+.mac-page-header .sub-title .grey-text {
+  color: #86868b; /* Apple 经典的次级文本灰色 */
+}
+
+.iPad-page-header .sub-title .grey-text {
+  color: #86868b; /* Apple 经典的次级文本灰色 */
+}
+
+/* --- 产品网格布局 (2x2 排列) --- */
+.product-grid {
+  display: grid;
+  /* 核心代码：将网格划分为 2 列，每列占 1 份 (1fr) 的空间 */
+  grid-template-columns: repeat(2, 1fr);
+  /* 上下行间距 40px，左右列间距 20px */
+  gap: 40px 20px;
+  /* 限制整体网格的最大宽度，让两台电脑不要离得太远 */
+  max-width: 900px;
+  /* 让整个网格在页面中居中对齐 */
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+/* --- 响应式设计：在手机或窄屏幕上自动变回一列 --- */
+@media (max-width: 768px) {
+  .product-grid {
+    /* 当屏幕宽度小于 768px 时，变为单列显示 */
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- 购买详情页专属样式 --- */
+.purchase-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* 左右分栏布局 */
+.purchase-layout {
+  display: flex;
+  gap: 60px;
+  align-items: flex-start;
+}
+
+.purchase-left {
+  flex: 1; /* 左边占一半 */
+  text-align: center;
+  background: #fbfbfd;
+  border-radius: 20px;
+  padding: 40px;
+}
+
+.purchase-left img {
+  max-width: 100%;
+  height: auto;
+}
+
+.purchase-right {
+  flex: 1; /* 右边占一半 */
+  display: flex;
+  flex-direction: column;
+}
+
+.purchase-title {
+  font-size: 40px;
+  margin: 0 0 10px 0;
+}
+
+.purchase-price {
+  font-size: 24px;
+  margin: 0 0 40px 0;
+  font-weight: 500;
+}
+
+.options-section {
+  margin-bottom: 40px;
+}
+
+.options-section h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+/* 颜色选择框（稍微大一点） */
+.color-options {
+  display: flex;
+  gap: 15px;
+}
+
+.color-box {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+.color-box.active {
+  outline: 2px solid #0071e3;
+  outline-offset: 4px;
+}
+
+/* 存储容量选择框 */
+.storage-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.storage-box {
+  border: 1px solid #d2d2d7;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.storage-box.active {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 1px #0071e3;
+}
+
+.capacity {
+  display: block;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.extra-price {
+  display: block;
+  font-size: 12px;
+  color: #86868b;
+  margin-top: 5px;
+}
+
+/* 底部按钮排版 */
+.action-buttons {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.action-buttons button {
+  flex: 1;
+  padding: 15px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+}
+
+.add-to-cart-btn {
+  background-color: #f5f5f7;
+  color: #0071e3;
+}
+
+.add-to-cart-btn:hover {
+  background-color: #e8e8ed;
+}
+
+.checkout-btn {
+  background-color: #0071e3;
+  color: white;
+}
+
+.checkout-btn:hover {
+  background-color: #0077ed;
+}
+
+/* 返回按钮 */
+.back-btn {
+  background: none;
+  border: none;
+  color: #0071e3;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Watch 列表页：不显示颜色圆点，并将卡片调得更紧凑 */
+#watch-page .color-dots {
+  display: none !important;
+}
+
+#watch-page .product-card {
+  max-width: 340px !important;
+  padding: 24px 16px 16px !important;
+}
+
+#watch-page .product-card img {
+  max-width: 88%;
+}

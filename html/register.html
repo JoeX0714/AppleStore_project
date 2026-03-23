@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>注册 Apple Store</title>
+        <link rel="stylesheet" href="../css/style.css" />
+        <link rel="stylesheet" href="../css/register.css" />
+    </head>
+    <body>
+        <nav class="apple-nav">
+            <div class="container">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="index.html" id="nav-logo" class="nav-logo">
+                            <img src="../images/Apple-Logo.png" alt="Apple Logo" />
+                        </a>
+                    </li>
+
+                    <li class="nav-item dropdown-parent">
+                        <a href="index.html">商店</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="index.html?tab=mac">Mac</a></li>
+                            <li><a href="index.html?tab=ipad">iPad</a></li>
+                            <li><a href="index.html?tab=iphone">iPhone</a></li>
+                            <li class="nav-item"><a href="index.html?tab=watch">Watch</a></li>
+                            <li class="nav-item"><a href="index.html?tab=airpods">AirPods</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item"><a href="index.html?tab=mac">Mac</a></li>
+                    <li class="nav-item"><a href="index.html?tab=ipad">iPad</a></li>
+                    <li class="nav-item"><a href="index.html?tab=iphone">iPhone</a></li>
+                    <li class="nav-item"><a href="index.html?tab=watch">Watch</a></li>
+                    <li class="nav-item"><a href="index.html?tab=airpods">AirPods</a></li>
+                    <li class="nav-item" id="nav-login"><a href="login.html">登录</a></li>
+                    <li class="nav-item auth-hidden" id="nav-user">
+                        <a href="javascript:void(0)" class="nav-avatar-link" aria-label="已登录用户">
+                            <svg class="nav-avatar-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="8" r="4"></circle>
+                                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"></path>
+                            </svg>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="nav-register"><a href="register.html">注册</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="login-page">
+            <section class="login-container">
+                <h1 class="main-title">创建你的 Apple Store 账户</h1>
+
+                <div class="login-box">
+                    <h2 class="sub-title">注册 Apple Store</h2>
+
+                    <form id="register-form">
+                        <div class="input-wrapper">
+                            <input
+                                type="text"
+                                placeholder="电子邮件或电话号码"
+                                id="register-account"
+                                required
+                            />
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="password" placeholder="密码" id="register-password" required />
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="password" placeholder="确认密码" id="register-confirm-password" required />
+                        </div>
+                        <button type="submit" class="continue-btn">创建账户</button>
+                    </form>
+
+                    <p id="register-tip" class="form-tip"></p>
+
+                    <p class="helper-text">
+                        已有账户？<a href="login.html">去登录</a>
+                    </p>
+                </div>
+            </section>
+        </main>
+        <script>
+            const registerForm = document.getElementById("register-form");
+            const registerAccountInput = document.getElementById("register-account");
+            const registerPasswordInput = document.getElementById("register-password");
+            const registerConfirmInput = document.getElementById("register-confirm-password");
+            const registerTip = document.getElementById("register-tip");
+                const API_BASE = "http://127.0.0.1:3100";
+            initAuthNav();
+
+            function normalizeAccount(value) {
+                const trimmed = value.trim();
+                return trimmed.includes("@")
+                    ? trimmed.toLowerCase()
+                    : trimmed.replace(/\s+/g, "");
+            }
+
+            function setTip(el, message, type) {
+                el.textContent = message;
+                el.className = "form-tip " + type;
+            }
+
+            registerForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const account = normalizeAccount(registerAccountInput.value);
+                const password = registerPasswordInput.value;
+                const confirmPassword = registerConfirmInput.value;
+
+                if (password !== confirmPassword) {
+                    setTip(registerTip, "两次输入的密码不一致", "error");
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE}/api/register`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ account, password, confirmPassword }),
+                    });
+
+                    const text = await response.text();
+                    let data = {};
+                    if (text) {
+                        try {
+                            data = JSON.parse(text);
+                        } catch (_error) {
+                            data = { message: "服务响应格式异常，请重试" };
+                        }
+                    }
+                    if (!response.ok) {
+                        setTip(registerTip, data.message || "注册失败，请稍后重试", "error");
+                        return;
+                    }
+
+                    registerForm.reset();
+                    setTip(registerTip, data.message || "注册成功", "success");
+                } catch (_error) {
+                    setTip(registerTip, "网络异常，请稍后重试", "error");
+                }
+            });
+
+            function initAuthNav() {
+                const navLogin = document.getElementById("nav-login");
+                const navRegister = document.getElementById("nav-register");
+                const navUser = document.getElementById("nav-user");
+                const userLink = navUser ? navUser.querySelector("a") : null;
+                const account = localStorage.getItem("appleStoreAccount");
+
+                if (!navLogin || !navRegister || !navUser) {
+                    return;
+                }
+
+                if (account) {
+                    navLogin.classList.add("auth-hidden");
+                    navRegister.classList.add("auth-hidden");
+                    navUser.classList.remove("auth-hidden");
+                    if (userLink) {
+                        userLink.title = `已登录：${account}`;
+                    }
+                    return;
+                }
+
+                navLogin.classList.remove("auth-hidden");
+                navRegister.classList.remove("auth-hidden");
+                navUser.classList.add("auth-hidden");
+            }
+        </script>
+    </body>
+</html>

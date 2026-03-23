@@ -1,0 +1,3332 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apple Store</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+
+  <body>
+    <nav class="apple-nav">
+      <div class="container">
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="javascript:void(0)" id="nav-logo" class="nav-logo">
+              <img src="../images/Apple-Logo.png" alt="Apple Logo" />
+            </a>
+          </li>
+
+          <li class="nav-item dropdown-parent">
+            <a href="#">商店</a>
+            <ul class="dropdown-menu">
+              <li><a href="javascript:void(0)" onclick="document.getElementById('nav-mac').click()">Mac</a></li>
+              <li><a href="javascript:void(0)" onclick="document.getElementById('nav-ipad').click()">iPad</a></li>
+              <li><a href="javascript:void(0)" onclick="document.getElementById('nav-iphone').click()">iPhone</a></li>
+              <li class="nav-item"><a href="javascript:void(0)" onclick="document.getElementById('nav-Watch').click()">Watch</a></li>
+              <li class="nav-item"><a href="javascript:void(0)" onclick="document.getElementById('nav-AirPods').click()">AirPods</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item">
+            <a href="javascript:void(0)" id="nav-mac">Mac</a>
+          </li>
+          <li class="nav-item">
+            <a href="javascript:void(0)" id="nav-ipad">iPad</a>
+          </li>
+          <li class="nav-item">
+            <a href="javascript:void(0)" id="nav-iphone">iPhone</a>
+          </li>
+          <li class="nav-item">
+            <a href="javascript:void(0)" id="nav-Watch">Watch</a>
+          </li>
+          <li class="nav-item">
+            <a href="javascript:void(0)" id="nav-AirPods">AirPods</a>
+          </li>
+          <li class="nav-item">
+            <a href="login.html" id="nav-login">登录</a>
+          </li>
+          <li class="nav-item auth-hidden" id="nav-user">
+            <a href="javascript:void(0)" class="nav-avatar-link" aria-label="已登录用户">
+              <svg class="nav-avatar-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"></path>
+              </svg>
+            </a>
+            <ul class="user-menu">
+              <li><button id="menu-cart" type="button">购物车</button></li>
+              <li><button id="menu-orders" type="button">查看订单</button></li>
+              <li><button id="menu-password" type="button">修改密码</button></li>
+              <li><button id="menu-logout" type="button">退出登录</button></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a href="register.html" id="nav-register">注册</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main>
+      <div id="cart-page" class="account-page" style="display: none">
+        <div class="account-page-header">
+          <h2>我的购物车</h2>
+          <button type="button" class="account-back-btn" onclick="showHomePage()">返回首页</button>
+        </div>
+        <div id="cart-toolbar" class="cart-toolbar auth-hidden">
+          <label class="cart-select-all">
+            <input id="cart-select-all" type="checkbox" />
+            全选
+          </label>
+          <p id="cart-checkout-summary" class="cart-summary">已选 0 件，共 RMB 0</p>
+          <button id="cart-checkout-selected-btn" type="button" class="buy-btn" disabled>
+            结算所选
+          </button>
+        </div>
+        <div id="cart-list" class="account-list"></div>
+      </div>
+
+      <div id="order-page" class="account-page" style="display: none">
+        <div class="account-page-header">
+          <h2>我的订单</h2>
+          <button type="button" class="account-back-btn" onclick="showHomePage()">返回首页</button>
+        </div>
+        <div id="order-list" class="account-list"></div>
+      </div>
+
+      <div id="password-page" class="account-page password-page" style="display: none">
+        <div class="account-page-header">
+          <h2>修改密码</h2>
+          <button type="button" class="account-back-btn" onclick="showHomePage()">返回首页</button>
+        </div>
+        <form id="password-form" class="password-form">
+          <input id="old-password" type="password" placeholder="旧密码" required />
+          <input id="new-password" type="password" placeholder="新密码（至少6位）" required />
+          <input id="confirm-new-password" type="password" placeholder="确认新密码" required />
+          <button type="submit" class="buy-btn">确认修改</button>
+        </form>
+        <p id="password-tip" class="form-tip"></p>
+      </div>
+
+      <div id="home-page">
+        <div style="padding-top: 200px; text-align: center">
+          <h1>欢迎来到 Apple Store</h1>
+          <p>请点击导航栏上的商品开始选购</p>
+        </div>
+      </div>
+
+      <div id="mac-page" style="display: none">
+        <div class="mac-page-header">
+          <h1 class="huge-title">选购 Mac</h1>
+          <h2 class="sub-title">
+            <span class="dark-text">全部机型，</span
+            ><span class="grey-text">随你挑。</span>
+          </h2>
+        </div>
+
+        <div class="product-grid">
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                MacBook Neo
+              </h3>
+            </div>
+            <img
+              id="neo-image"
+              src="../images/MacBook neo-silver.jpg"
+              alt="MacBook Neo"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #e3e4e5"
+                  onclick="
+                    changeColor(this, 'MacBook neo-silver.jpg', 'neo-image')
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #f0d8d2"
+                  onclick="
+                    changeColor(this, 'MacBook neo-blush.jpg', 'neo-image')
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #e3e3af"
+                  onclick="
+                    changeColor(this, 'MacBook neo-citrus.jpg', 'neo-image')
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #545e6b"
+                  onclick="
+                    changeColor(this, 'MacBook neo-indigo.jpg', 'neo-image')
+                  "
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 192/月 (0% 费率 24 个月分期) 起或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 4599 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('neo')">购买</button>
+            </div>
+          </div>
+
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                MacBook Air
+              </h3>
+            </div>
+            <img
+              id="air-image"
+              src="../images/MacBook Air-midnight.jpg"
+              alt="MacBook Air"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #2e3641"
+                  onclick="
+                    changeColor(this, 'MacBook Air-midnight.jpg', 'air-image')
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #f0e4d3"
+                  onclick="
+                    changeColor(this, 'MacBook Air-starlight.jpg', 'air-image')
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #7d7e80"
+                  onclick="
+                    changeColor(this, 'MacBook Air-sky blue.jpg', 'air-image')
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #e3e4e5"
+                  onclick="
+                    changeColor(this, 'MacBook Air-silver.jpg', 'air-image')
+                  "
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 385/月 (0% 费率 24 个月分期) 起或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 9249 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('air')">购买</button>
+            </div>
+          </div>
+
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                MacBook Pro
+              </h3>
+            </div>
+            <img
+              id="pro-image"
+              src="../images/MacBook Pro-space black.jpg"
+              alt="MacBook Pro"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #2e2f31"
+                  onclick="
+                    changeColor(
+                      this,
+                      'MacBook Pro-space black.jpg',
+                      'pro-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #e3e4e5"
+                  onclick="
+                    changeColor(this, 'MacBook Pro-silver.jpg', 'pro-image')
+                  "
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 562/月 (0% 费率 24 个月分期) 起或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 13499 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('pro')">购买</button>
+            </div>
+          </div>
+
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: transparent;
+                  display: block;
+                  margin-bottom: 8px;
+                  user-select: none;
+                "
+                >占位</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                iMac
+              </h3>
+            </div>
+            <img
+              id="imac-image"
+              src="../images/iMac-blue.jpg"
+              alt="iMac"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #4b71a6"
+                  onclick="changeColor(this, 'iMac-blue.jpg', 'imac-image')"
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #518b6e"
+                  onclick="changeColor(this, 'iMac-green.jpg', 'imac-image')"
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #e38994"
+                  onclick="changeColor(this, 'iMac-pink.jpg', 'imac-image')"
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #e3e4e5"
+                  onclick="changeColor(this, 'iMac-silver.jpg', 'imac-image')"
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 458/月 (0% 费率 24 个月分期) 起或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 10999 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('imac')">购买</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="purchase-page" style="display: none">
+        <div class="purchase-container">
+          <div style="margin-bottom: 20px">
+            <button class="back-btn" onclick="goBackToMac()">
+              &lt; 返回 Mac 选购
+            </button>
+          </div>
+
+          <div class="purchase-layout">
+            <div class="purchase-left">
+              <img
+                id="large-product-image"
+                src="../images/MacBook neo-silver.jpg"
+                alt="MacBook Neo"
+              />
+            </div>
+
+            <div class="purchase-right">
+              <h1 class="purchase-title">MacBook Neo</h1>
+              <p class="purchase-price">RMB 4599</p>
+
+              <div id="appearance-section" class="options-section">
+                <h3 id="dynamic-appearance-title">外观</h3>
+                <div id="dynamic-color-options" class="storage-options"></div>
+              </div>
+
+              <div id="spec-section" class="options-section">
+                <h3 id="dynamic-spec-title">存储容量</h3>
+                <div id="dynamic-spec-options" class="storage-options"></div>
+              </div>
+
+              <div
+                id="connection-section"
+                class="options-section"
+                style="display: none"
+              >
+                <h3>连接</h3>
+                <div
+                  id="dynamic-connection-options"
+                  class="storage-options"
+                ></div>
+              </div>
+
+              <div class="action-buttons">
+                <button class="add-to-cart-btn">加入购物车</button>
+                <button class="checkout-btn">结账</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="iPad-page" style="display: none">
+        <div class="iPad-page-header">
+          <h1 class="huge-title">选购 iPad</h1>
+          <h2 class="sub-title">
+            <span class="dark-text">全部机型，</span
+            ><span class="grey-text">随你挑。</span>
+          </h2>
+        </div>
+
+        <div class="product-grid">
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                iPad Pro
+              </h3>
+            </div>
+            <img
+              id="ipad pro-image"
+              src="../images/ipad pro-space black.webp"
+              alt="iPad Pro"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #2e2f31"
+                  onclick="
+                    changeColor(
+                      this,
+                      'ipad pro-space black.webp',
+                      'ipad pro-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #e3e4e5"
+                  onclick="
+                    changeColor(this, 'ipad pro-silver.webp', 'ipad pro-image')
+                  "
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 375/月 (0% 费率 24 个月分期) 起或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 8999 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('ipad-pro')">
+                购买
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                iPad Air
+              </h3>
+            </div>
+            <img
+              id="ipad air-image"
+              src="../images/ipad air-blue.webp"
+              alt="iPad air"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #4b71a6"
+                  onclick="
+                    changeColor(this, 'ipad air-blue.webp', 'ipad air-image')
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #f0e4d3"
+                  onclick="
+                    changeColor(
+                      this,
+                      'ipad air-starlight.webp',
+                      'ipad air-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #e3e4e5"
+                  onclick="
+                    changeColor(this, 'ipad air-purple.webp', 'ipad air-image')
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #beb0c4"
+                  onclick="
+                    changeColor(
+                      this,
+                      'ipad air-space gray.webp',
+                      'ipad air-image',
+                    )
+                  "
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 200/月 (0% 费率 24 个月分期) 起或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 4799 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('ipad-air')">
+                购买
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                iPad
+              </h3>
+            </div>
+            <img
+              id="ipad-image"
+              src="../images/ipad blue.webp"
+              alt="iPad"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #4b71a6"
+                  onclick="changeColor(this, 'ipad blue.webp', 'ipad-image')"
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #db6272"
+                  onclick="changeColor(this, 'ipad pink.webp', 'ipad-image')"
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #e3e4e5"
+                  onclick="changeColor(this, 'ipad silver.webp', 'ipad-image')"
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #e8cf62"
+                  onclick="changeColor(this, 'ipad yellow.webp', 'ipad-image')"
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 562/月 (0% 费率 24 个月分期) 起或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 2999 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('ipad')">购买</button>
+            </div>
+          </div>
+
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: transparent;
+                  display: block;
+                  margin-bottom: 8px;
+                  user-select: none;
+                "
+                >占位</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                iPad mini
+              </h3>
+            </div>
+            <img
+              id="ipad mini-image"
+              src="../images/ipad mini-blue.webp"
+              alt="iPad mini"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #4b71a6"
+                  onclick="
+                    changeColor(this, 'ipad mini-blue.webp', 'ipad mini-image')
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #e3e4e5"
+                  onclick="
+                    changeColor(
+                      this,
+                      'ipad mini-purple.webp',
+                      'ipad mini-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #beb0c4"
+                  onclick="
+                    changeColor(
+                      this,
+                      'ipad mini-space gray.webp',
+                      'ipad mini-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #f0e4d3"
+                  onclick="
+                    changeColor(
+                      this,
+                      'ipad mini-starlight.webp',
+                      'ipad mini-image',
+                    )
+                  "
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 167/月 (0% 费率 24 个月分期) 起或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 3999 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('ipad-mini')">
+                购买
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="watch-page" style="display: none">
+        <div class="iPad-page-header">
+          <h1 class="huge-title">选购 Apple Watch</h1>
+          <h2 class="sub-title">
+            <span class="dark-text">健康与风格，</span
+            ><span class="grey-text">一表尽显。</span>
+          </h2>
+        </div>
+
+        <div class="product-grid">
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                Apple Watch Series 11
+              </h3>
+            </div>
+            <img
+              id="watch-series11-image"
+              src="../images/Apple Watch Series 11.jpg"
+              alt="Apple Watch Series 11"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #2f3237"
+                  onclick="
+                    changeColor(
+                      this,
+                      'Apple Watch Series 11.jpg',
+                      'watch-series11-image',
+                    )
+                  "
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 125/月（0%费率24个月分期）起或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 2999 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('watch-series11')">
+                购买
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                Apple Watch SE 3
+              </h3>
+            </div>
+            <img
+              id="watch-se3-image"
+              src="../images/Apple Watch SE 3.jpg"
+              alt="Apple Watch SE 3"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #6b6f75"
+                  onclick="
+                    changeColor(this, 'Apple Watch SE 3.jpg', 'watch-se3-image')
+                  "
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 83/月（0%费率24个月分期）起或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 1999 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('watch-se3')">
+                购买
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                Apple Watch Ultra 3
+              </h3>
+            </div>
+            <img
+              id="watch-ultra3-image"
+              src="../images/Apple Watch Ultra 3.png"
+              alt="Apple Watch Ultra 3"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #d2a35b"
+                  onclick="
+                    changeColor(
+                      this,
+                      'Apple Watch Ultra 3.png',
+                      'watch-ultra3-image',
+                    )
+                  "
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 271/月（0%费率24个月分期）起或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 6499 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('watch-ultra3')">
+                购买
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="iphone-page" style="display: none">
+        <div class="iPad-page-header">
+          <h1 class="huge-title">选购 iPhone</h1>
+          <h2 class="sub-title">
+            <span class="dark-text">全部机型，</span
+            ><span class="grey-text">随你挑。</span>
+          </h2>
+        </div>
+
+        <div class="product-grid">
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                iPhone 17e
+              </h3>
+            </div>
+            <img
+              id="iphone-17e-image"
+              src="../images/iPhone 17e-black.webp"
+              alt="iPhone 17e"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #2f3237"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone 17e-black.webp',
+                      'iphone-17e-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #f5dfe0"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone 17e-soft pink.webp',
+                      'iphone-17e-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #f3f3f0"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone 17e-white.webp',
+                      'iphone-17e-image',
+                    )
+                  "
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 187/月 (0% 费率 24 个月分期) 或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 4499 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('iphone-17e')">
+                购买
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                iPhone 17
+              </h3>
+            </div>
+            <img
+              id="iphone-17-image"
+              src="../images/iPhone 17-black.webp"
+              alt="iPhone 17"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #2f3237"
+                  onclick="
+                    changeColor(this, 'iPhone 17-black.webp', 'iphone-17-image')
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #c9c2e8"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone 17-lavender.webp',
+                      'iphone-17-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #b9d4e8"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone 17-mist blue.webp',
+                      'iphone-17-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #b8c6b0"
+                  onclick="
+                    changeColor(this, 'iPhone 17-sage.webp', 'iphone-17-image')
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #f3f3f0"
+                  onclick="
+                    changeColor(this, 'iPhone 17-white.webp', 'iphone-17-image')
+                  "
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 250/月 (0% 费率 24 个月分期) 或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 5999 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('iphone-17')">
+                购买
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                iPhone air
+              </h3>
+            </div>
+            <img
+              id="iphone-air-image"
+              src="../images/iPhone air-space black.webp"
+              alt="iPhone air"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #2f3237"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone air-space black.webp',
+                      'iphone-air-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #f2f2f1"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone air-cloud white.webp',
+                      'iphone-air-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #d8c196"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone air-light gold.webp',
+                      'iphone-air-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #b9d4e8"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone air-sky blue.webp',
+                      'iphone-air-image',
+                    )
+                  "
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 333/月 (0% 费率 24 个月分期) 或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 7999 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('iphone-air')">
+                购买
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                iPhone 17 Pro
+              </h3>
+            </div>
+            <img
+              id="iphone-17pro-image"
+              src="../images/iPhone 17 pro-deep blue.webp"
+              alt="iPhone 17 Pro"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #23324c"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone 17 pro-deep blue.webp',
+                      'iphone-17pro-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #e8864f"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone 17 pro-cosmic orange.webp',
+                      'iphone-17pro-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #e8e8e6"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone 17 pro-silver.webp',
+                      'iphone-17pro-image',
+                    )
+                  "
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 375/月 (0% 费率 24 个月分期) 或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 8999 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('iphone-17pro')">
+                购买
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: transparent;
+                  display: block;
+                  margin-bottom: 8px;
+                  user-select: none;
+                "
+                >占位</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                iPhone 17 Pro Max
+              </h3>
+            </div>
+            <img
+              id="iphone-17promax-image"
+              src="../images/iPhone 17 pro max-deep blue.webp"
+              alt="iPhone 17 Pro Max"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="color-dots"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <span
+                  class="dot active"
+                  style="background-color: #23324c"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone 17 pro max-deep blue.webp',
+                      'iphone-17promax-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #e8864f"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone 17 pro max-cosmic orange.webp',
+                      'iphone-17promax-image',
+                    )
+                  "
+                ></span>
+                <span
+                  class="dot"
+                  style="background-color: #e8e8e6"
+                  onclick="
+                    changeColor(
+                      this,
+                      'iPhone 17 pro max-silver.webp',
+                      'iphone-17promax-image',
+                    )
+                  "
+                ></span>
+              </div>
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p
+                  class="installment"
+                  style="color: #1d1d1f; margin-bottom: 2px"
+                >
+                  RMB 417/月 (0% 费率 24 个月分期) 或
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 9999 起
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('iphone-17promax')">
+                购买
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="airpods-page" style="display: none">
+        <div class="iPad-page-header">
+          <h1 class="huge-title">选购 AirPods</h1>
+          <h2 class="sub-title">
+            <span class="dark-text">聆听新声，</span
+            ><span class="grey-text">沉浸其中。</span>
+          </h2>
+        </div>
+
+        <div class="product-grid">
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                AirPods 4
+              </h3>
+            </div>
+            <img
+              id="airpods4-image"
+              src="../images/airpods.png"
+              alt="AirPods 4"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 999
+                </p>
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  主动降噪款 RMB 1399
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('airpods-4')">
+                购买
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                AirPods Pro 3
+              </h3>
+            </div>
+            <img
+              id="airpods-pro3-image"
+              src="../images/airpods-pro-3.jpg"
+              alt="AirPods Pro 3"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 1399
+                </p>
+              </div>
+              <button class="buy-btn" onclick="showAirPodsTip()">购买</button>
+            </div>
+          </div>
+
+          <div
+            class="product-card"
+            style="
+              position: relative;
+              max-width: 400px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              padding: 30px 20px 20px;
+              text-align: center;
+            "
+          >
+            <div
+              style="text-align: left; margin-bottom: 10px; padding-left: 10px"
+            >
+              <span
+                class="tag"
+                style="
+                  font-size: 12px;
+                  color: #b66a51;
+                  font-weight: bold;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+                >新款</span
+              >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 26px;
+                  color: #1d1d1f;
+                  line-height: 1.2;
+                "
+              >
+                AirPods Max 2
+              </h3>
+            </div>
+            <img
+              id="airpods-max2-image"
+              src="../images/AirPods Max 2.jpg"
+              alt="AirPods Max 2"
+              style="max-width: 100%; height: auto; margin-top: 10px"
+            />
+            <div class="product-cta" style="margin-top: 0">
+              <div
+                class="price-info"
+                style="margin-bottom: 20px; font-size: 14px; line-height: 1.3"
+              >
+                <p class="price" style="color: #1d1d1f; font-weight: 500">
+                  RMB 3999
+                </p>
+              </div>
+              <button class="buy-btn" onclick="buyProduct('airpods-max2')">
+                购买
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // --- 功能 1：点击颜色小点切换图片 ---
+      function changeColor(clickedDot, fileName, imageId) {
+        // 1. 根据传入的 imageId 找到对应的图片标签 (比如 'neo-image' 或 'air-image')
+        const mainImg = document.getElementById(imageId);
+
+        // 2. 直接将传入的文件名拼接到路径后
+        mainImg.src = `../images/${fileName}`;
+
+        // 3. 改变同一组小点点的“选中”状态
+        const dots = clickedDot.parentElement.getElementsByClassName("dot");
+        for (let i = 0; i < dots.length; i++) {
+          dots[i].classList.remove("active");
+        }
+        clickedDot.classList.add("active");
+      }
+
+      // --- 终极版：产品数据库，记录了每个产品的详细信息 ---
+      const productData = {
+        neo: {
+          category: "mac",
+          storageMode: "surcharge",
+          name: "MacBook Neo",
+          price: 4599,
+          baseImage: "MacBook neo-silver.jpg",
+          colors: [
+            { name: "银色", file: "MacBook neo-silver.jpg" },
+            { name: "桃粉色", file: "MacBook neo-blush.jpg" },
+            { name: "柑橘黄色", file: "MacBook neo-citrus.jpg" },
+            { name: "靛蓝色", file: "MacBook neo-indigo.jpg" },
+          ],
+          storages: [
+            { capacity: "256GB 统一内存", price: 0 },
+            { capacity: "512GB 统一内存", price: 700 },
+          ],
+        },
+        air: {
+          category: "mac",
+          storageMode: "surcharge",
+          name: "MacBook Air",
+          price: 9249,
+          baseImage: "mac-air-midnight.jpg",
+          colors: [
+            { name: "午夜色", file: "MacBook Air-midnight.jpg" },
+            { name: "星光色", file: "MacBook Air-starlight.jpg" },
+            { name: "天蓝色", file: "MacBook Air-sky blue.jpg" },
+            { name: "银色", file: "MacBook Air-silver.jpg" },
+          ],
+          storages: [
+            { capacity: "512GB 统一内存", price: 0 },
+            { capacity: "1TB 统一内存", price: 1500 },
+            { capacity: "2TB 统一内存", price: 4500 },
+            { capacity: "4TB 统一内存", price: 9000 },
+          ],
+        },
+        pro: {
+          category: "mac",
+          storageMode: "surcharge",
+          name: "MacBook Pro",
+          price: 13499,
+          baseImage: "mac-pro-black.jpg",
+          colors: [
+            { name: "深空黑色", file: "MacBook Pro-space black.jpg" },
+            { name: "银色", file: "MacBook Pro-silver.jpg" }, // Pro 只有两个颜色
+          ],
+          storages: [
+            { capacity: "1TB 统一内存", price: 0 },
+            { capacity: "2TB 统一内存", price: 3000 },
+            { capacity: "4TB 统一内存", price: 7500 },
+          ],
+        },
+        imac: {
+          category: "mac",
+          storageMode: "surcharge",
+          name: "iMac",
+          price: 10999,
+          baseImage: "imac-blue.jpg",
+          colors: [
+            { name: "蓝色", file: "iMac-blue.jpg" },
+            { name: "绿色", file: "iMac-green.jpg" },
+            { name: "粉色", file: "iMac-pink.jpg" },
+            { name: "银色", file: "iMac-silver.jpg" },
+          ],
+          storages: [
+            { capacity: "256GB 统一内存", price: 0 },
+            { capacity: "512GB 统一内存", price: 1500 },
+            { capacity: "1TB 统一内存", price: 3000 },
+          ],
+        },
+        "ipad-pro": {
+          category: "ipad",
+          storageMode: "absolute",
+          name: "iPad Pro",
+          price: 8999,
+          baseImage: "ipad pro-space black.webp",
+          colors: [
+            { name: "深空黑色", file: "ipad pro-space black.webp" },
+            { name: "银色", file: "ipad pro-silver.webp" },
+          ],
+          storages: [
+            { capacity: "256GB", price: 8999 },
+            { capacity: "512GB", price: 10699 },
+            { capacity: "1TB", price: 14099 },
+            { capacity: "2TB", price: 17499 },
+          ],
+        },
+        "ipad-air": {
+          category: "ipad",
+          storageMode: "absolute",
+          name: "iPad Air",
+          price: 4799,
+          baseImage: "ipad air-blue.webp",
+          colors: [
+            { name: "蓝色", file: "ipad air-blue.webp" },
+            { name: "星光色", file: "ipad air-starlight.webp" },
+            { name: "紫色", file: "ipad air-purple.webp" },
+            { name: "深空灰", file: "ipad air-space gray.webp" },
+          ],
+          storages: [
+            { capacity: "128GB", price: 4799 },
+            { capacity: "256GB", price: 5299 },
+            { capacity: "512GB", price: 6999 },
+            { capacity: "1TB", price: 8699 },
+          ],
+        },
+        ipad: {
+          category: "ipad",
+          storageMode: "absolute",
+          name: "iPad",
+          price: 2999,
+          baseImage: "ipad blue.webp",
+          colors: [
+            { name: "蓝色", file: "ipad blue.webp" },
+            { name: "粉色", file: "ipad pink.webp" },
+            { name: "银色", file: "ipad silver.webp" },
+            { name: "黄色", file: "ipad yellow.webp" },
+          ],
+          storages: [
+            { capacity: "128GB", price: 2999 },
+            { capacity: "256GB", price: 3499 },
+            { capacity: "512GB", price: 5199 },
+          ],
+        },
+        "ipad-mini": {
+          category: "ipad",
+          storageMode: "absolute",
+          name: "iPad mini",
+          price: 3999,
+          baseImage: "ipad mini-blue.webp",
+          colors: [
+            { name: "蓝色", file: "ipad mini-blue.webp" },
+            { name: "紫色", file: "ipad mini-purple.webp" },
+            { name: "深空灰", file: "ipad mini-space gray.webp" },
+            { name: "星光色", file: "ipad mini-starlight.webp" },
+          ],
+          storages: [
+            { capacity: "128GB", price: 3999 },
+            { capacity: "256GB", price: 4499 },
+            { capacity: "512GB", price: 6199 },
+          ],
+        },
+        "iphone-17e": {
+          category: "iphone",
+          storageMode: "absolute",
+          name: "iPhone 17e",
+          price: 4499,
+          baseImage: "iPhone 17e-black.webp",
+          colors: [
+            { name: "黑色", file: "iPhone 17e-black.webp" },
+            { name: "浅粉色", file: "iPhone 17e-soft pink.webp" },
+            { name: "白色", file: "iPhone 17e-white.webp" },
+          ],
+          storages: [
+            { capacity: "256GB", price: 4499 },
+            { capacity: "512GB", price: 6499 },
+          ],
+        },
+        "iphone-17": {
+          category: "iphone",
+          storageMode: "absolute",
+          name: "iPhone 17",
+          price: 5999,
+          baseImage: "iPhone 17-black.webp",
+          colors: [
+            { name: "黑色", file: "iPhone 17-black.webp" },
+            { name: "薰衣草紫色", file: "iPhone 17-lavender.webp" },
+            { name: "青雾蓝色", file: "iPhone 17-mist blue.webp" },
+            { name: "鼠尾草绿色", file: "iPhone 17-sage.webp" },
+            { name: "白色", file: "iPhone 17-white.webp" },
+          ],
+          storages: [
+            { capacity: "256GB", price: 5999 },
+            { capacity: "512GB", price: 7999 },
+          ],
+        },
+        "iphone-air": {
+          category: "iphone",
+          storageMode: "absolute",
+          name: "iPhone air",
+          price: 7999,
+          baseImage: "iPhone air-space black.webp",
+          colors: [
+            { name: "深空黑色", file: "iPhone air-space black.webp" },
+            { name: "云白色", file: "iPhone air-cloud white.webp" },
+            { name: "浅金色", file: "iPhone air-light gold.webp" },
+            { name: "天蓝色", file: "iPhone air-sky blue.webp" },
+          ],
+          storages: [
+            { capacity: "256GB", price: 7999 },
+            { capacity: "512GB", price: 9999 },
+            { capacity: "1TB", price: 11999 },
+          ],
+        },
+        "iphone-17pro": {
+          category: "iphone",
+          storageMode: "absolute",
+          name: "iPhone 17 Pro",
+          price: 8999,
+          baseImage: "iPhone 17 pro-deep blue.webp",
+          colors: [
+            { name: "深蓝色", file: "iPhone 17 pro-deep blue.webp" },
+            {
+              name: "星宇橙色",
+              file: "iPhone 17 pro-cosmic orange.webp",
+            },
+            { name: "银色", file: "iPhone 17 pro-silver.webp" },
+          ],
+          storages: [
+            { capacity: "256GB", price: 8999 },
+            { capacity: "512GB", price: 10999 },
+            { capacity: "1TB", price: 12999 },
+          ],
+        },
+        "iphone-17promax": {
+          category: "iphone",
+          storageMode: "absolute",
+          name: "iPhone 17 Pro Max",
+          price: 9999,
+          baseImage: "iPhone 17 pro max-deep blue.webp",
+          colors: [
+            { name: "深蓝色", file: "iPhone 17 pro max-deep blue.webp" },
+            {
+              name: "星宇橙色",
+              file: "iPhone 17 pro max-cosmic orange.webp",
+            },
+            { name: "银色", file: "iPhone 17 pro max-silver.webp" },
+          ],
+          storages: [
+            { capacity: "256GB", price: 9999 },
+            { capacity: "512GB", price: 11999 },
+            { capacity: "1TB", price: 13999 },
+            { capacity: "2TB", price: 17999 },
+          ],
+        },
+        "watch-series11": {
+          category: "watch",
+          storageMode: "watch-material",
+          name: "Apple Watch Series 11",
+          price: 2999,
+          baseImage: "Apple Watch Series 11.jpg",
+          colors: [{ name: "默认款式", file: "Apple Watch Series 11.jpg" }],
+          materials: [
+            {
+              capacity: "铝金属",
+              price: 2999,
+              installment: "RMB 125/月起（0%费率24个月分期）",
+              displayPrice: "或RMB 2999起",
+            },
+            {
+              capacity: "钛金属",
+              price: 5799,
+              installment: "RMB 242/月起（0%费率24个月分期）",
+              displayPrice: "或RMB 5799起",
+            },
+          ],
+          sizes: [
+            {
+              capacity: "42毫米",
+              price: 2999,
+              installment: "RMB 125/月起",
+              displayPrice: "或RMB 2999起",
+            },
+            {
+              capacity: "46毫米",
+              price: 3199,
+              installment: "RMB 133/月",
+              displayPrice: "或RMB 3199起",
+            },
+          ],
+          connections: [
+            {
+              capacity: "GPS",
+              price: 2999,
+              installment: "RMB 125/月起",
+              displayPrice: "或RMB 2999起",
+            },
+            {
+              capacity: "GPS+蜂窝网络",
+              price: 3799,
+              installment: "RMB 158/月起",
+              displayPrice: "或RMB 3799起",
+            },
+          ],
+        },
+        "watch-se3": {
+          category: "watch",
+          storageMode: "watch-material",
+          materialLocked: true,
+          name: "Apple Watch SE 3",
+          price: 1999,
+          baseImage: "Apple Watch SE 3.jpg",
+          colors: [{ name: "默认款式", file: "Apple Watch SE 3.jpg" }],
+          materials: [
+            {
+              capacity: "铝金属",
+              price: 1999,
+              installment: "100%再生铝金属",
+              displayPrice: "适合各种日常活动及体能训练佩戴",
+            },
+          ],
+          sizes: [
+            {
+              capacity: "40毫米",
+              price: 1999,
+              installment: "RMB 83/月起",
+              displayPrice: "或RMB 1999起",
+            },
+            {
+              capacity: "44毫米",
+              price: 2199,
+              installment: "RMB 92/月起",
+              displayPrice: "或RMB 2199起",
+            },
+          ],
+          connections: [
+            {
+              capacity: "GPS",
+              price: 1999,
+              installment: "RMB 83/月起",
+              displayPrice: "或RMB 1999起",
+            },
+            {
+              capacity: "GPS+蜂窝网络",
+              price: 2399,
+              installment: "RMB 100/月起",
+              displayPrice: "或RMB 2399起",
+            },
+          ],
+        },
+        "watch-ultra3": {
+          category: "watch",
+          storageMode: "watch-material",
+          name: "Apple Watch Ultra 3",
+          price: 6499,
+          baseImage: "Apple Watch Ultra 3-black.png",
+          colors: [{ name: "默认款式", file: "Apple Watch Ultra 3-black.png" }],
+          appearanceTitle: "表壳",
+          specTitle: "表带",
+          showConnection: false,
+          materials: [
+            {
+              capacity: "黑色",
+              price: 6499,
+              installment: "RMB 271/月",
+              displayPrice: "或RMB 6499起",
+              file: "Apple Watch Ultra 3-black.png",
+            },
+            {
+              capacity: "原色",
+              price: 6499,
+              installment: "RMB 271/月",
+              displayPrice: "或RMB 6499起",
+              file: "Apple Watch Ultra 3-natural.png",
+            },
+          ],
+          sizes: [
+            {
+              capacity: "高山回环式表带",
+              price: 6499,
+              installment: "RMB 271/月",
+              displayPrice: "或RMB 6499起",
+              description: "适合户外探险和徒步",
+            },
+            {
+              capacity: "野径回环式表带",
+              price: 6499,
+              installment: "RMB 271/月",
+              displayPrice: "或RMB 6499起",
+              description: "适合各种活动和体能训练",
+            },
+            {
+              capacity: "海洋表带",
+              price: 6499,
+              installment: "RMB 271/月",
+              displayPrice: "或RMB 6499起",
+              description: "适合水上运动和潜水",
+            },
+            {
+              capacity: "钛金属米兰尼斯表带",
+              price: 7499,
+              installment: "RMB 312/月",
+              displayPrice: "或RMB 7499起",
+              description: "专为海洋设计，造型优雅，适合各种场合",
+            },
+          ],
+          connections: [],
+        },
+        "airpods-4": {
+          category: "airpods",
+          storageMode: "airpods-model",
+          name: "AirPods 4",
+          price: 999,
+          baseImage: "airpods-4.jpg",
+          colors: [],
+          models: [
+            {
+              capacity: "AirPods 4",
+              price: 999,
+              file: "airpods-4.jpg",
+            },
+            {
+              capacity: "AirPods 4（支持主动降噪）",
+              price: 1399,
+              installment: "RMB 58/月",
+              displayPrice: "或RMB 1399",
+              file: "airpods-4-anc.jpg",
+            },
+          ],
+          storages: [],
+        },
+        "airpods-max2": {
+          category: "airpods",
+          storageMode: "color-only",
+          name: "AirPods Max 2",
+          price: 3999,
+          baseImage: "airpods-max-blue.jpg",
+          colors: [
+            { name: "蓝色", file: "airpods-max-blue.jpg" },
+            { name: "紫色", file: "airpods-max-purple.jpg" },
+            { name: "午夜色", file: "airpods-max-midnigh.jpg" },
+            { name: "星光色", file: "airpods-max-starlight.jpg" },
+            { name: "橙色", file: "airpods-max-orange.jpg" },
+          ],
+          storages: [],
+        },
+      };
+
+      let currentCategory = "mac";
+      let currentProductId = "";
+      let currentWatchSelection = {
+        material: 0,
+        size: 0,
+        connection: 0,
+      };
+
+      function getCurrentAccount() {
+        return localStorage.getItem("appleStoreAccount") || "";
+      }
+
+      function ensureLoggedIn() {
+        if (getCurrentAccount()) {
+          return true;
+        }
+        window.location.href = "login.html";
+        return false;
+      }
+
+      function getStorageKey(prefix) {
+        return `${prefix}:${getCurrentAccount()}`;
+      }
+
+      function readList(key) {
+        try {
+          const data = JSON.parse(localStorage.getItem(key) || "[]");
+          return Array.isArray(data) ? data : [];
+        } catch (_error) {
+          return [];
+        }
+      }
+
+      function writeList(key, list) {
+        localStorage.setItem(key, JSON.stringify(list));
+      }
+
+      function getCurrentSelectionText() {
+        const activeCaps = Array.from(
+          document.querySelectorAll("#purchase-page .storage-box.active .capacity"),
+        )
+          .map((item) => item.innerText.trim())
+          .filter(Boolean);
+        return activeCaps.join(" / ");
+      }
+
+      function getCurrentPurchasePrice() {
+        const priceText = document.querySelector(".purchase-price")
+          ? document.querySelector(".purchase-price").innerText
+          : "";
+        const onlyDigits = priceText.replace(/\D/g, "");
+        return Number(onlyDigits || 0);
+      }
+
+      function buildCurrentItem() {
+        const image = document.getElementById("large-product-image");
+        return {
+          id: Date.now(),
+          productId: currentProductId,
+          name: document.querySelector(".purchase-title").innerText,
+          price: getCurrentPurchasePrice(),
+          selection: getCurrentSelectionText(),
+          image: image ? image.src : "",
+          createdAt: new Date().toLocaleString("zh-CN"),
+        };
+      }
+
+      function hideAllMainPages() {
+        const pageIds = [
+          "home-page",
+          "mac-page",
+          "iPad-page",
+          "watch-page",
+          "iphone-page",
+          "airpods-page",
+          "purchase-page",
+          "cart-page",
+          "order-page",
+          "password-page",
+        ];
+        pageIds.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.style.display = "none";
+          }
+        });
+      }
+
+      function showHomePage() {
+        hideAllMainPages();
+        document.getElementById("home-page").style.display = "block";
+      }
+
+      function renderCartPage() {
+        const listEl = document.getElementById("cart-list");
+        const toolbar = document.getElementById("cart-toolbar");
+        const selectAllEl = document.getElementById("cart-select-all");
+        const cartItems = readList(getStorageKey("appleStoreCart"));
+
+        if (!cartItems.length) {
+          if (toolbar) {
+            toolbar.classList.add("auth-hidden");
+          }
+          listEl.innerHTML = '<p class="empty-tip">购物车是空的，去挑一款喜欢的产品吧。</p>';
+          return;
+        }
+
+        if (toolbar) {
+          toolbar.classList.remove("auth-hidden");
+        }
+        if (selectAllEl) {
+          selectAllEl.checked = false;
+          selectAllEl.indeterminate = false;
+        }
+
+        listEl.innerHTML = cartItems
+          .map(
+            (item, index) => `
+            <div class="account-item">
+              <div>
+                <label class="cart-item-check">
+                  <input class="cart-select" type="checkbox" value="${index}" onchange="updateCartCheckoutInfo()" />
+                  选择
+                </label>
+                <p class="item-title">${item.name}</p>
+                <p class="item-meta">${item.selection || "默认配置"}</p>
+                <p class="item-meta">RMB ${item.price}</p>
+                <p class="item-meta">加入时间：${item.createdAt}</p>
+              </div>
+              <button class="buy-btn" onclick="removeCartItem(${index})">移除</button>
+            </div>
+          `,
+          )
+          .join("");
+
+        updateCartCheckoutInfo();
+      }
+
+      function getSelectedCartIndexes() {
+        return Array.from(document.querySelectorAll(".cart-select:checked"))
+          .map((item) => Number(item.value))
+          .filter((value) => Number.isInteger(value));
+      }
+
+      function syncCartSelectAllState() {
+        const selectAllEl = document.getElementById("cart-select-all");
+        if (!selectAllEl) {
+          return;
+        }
+        const allChecks = Array.from(document.querySelectorAll(".cart-select"));
+        const checkedCount = allChecks.filter((item) => item.checked).length;
+
+        if (!allChecks.length) {
+          selectAllEl.checked = false;
+          selectAllEl.indeterminate = false;
+          return;
+        }
+
+        selectAllEl.checked = checkedCount === allChecks.length;
+        selectAllEl.indeterminate = checkedCount > 0 && checkedCount < allChecks.length;
+      }
+
+      function toggleSelectAllCart(checked) {
+        const allChecks = Array.from(document.querySelectorAll(".cart-select"));
+        allChecks.forEach((item) => {
+          item.checked = checked;
+        });
+        updateCartCheckoutInfo();
+      }
+
+      function updateCartCheckoutInfo() {
+        const summaryEl = document.getElementById("cart-checkout-summary");
+        const checkoutBtn = document.getElementById("cart-checkout-selected-btn");
+        const cartItems = readList(getStorageKey("appleStoreCart"));
+        const selectedIndexes = getSelectedCartIndexes();
+        const selectedItems = selectedIndexes.map((index) => cartItems[index]).filter(Boolean);
+        const totalPrice = selectedItems.reduce((sum, item) => sum + Number(item.price || 0), 0);
+
+        if (summaryEl) {
+          summaryEl.innerText = `已选 ${selectedItems.length} 件，共 RMB ${totalPrice}`;
+        }
+        if (checkoutBtn) {
+          checkoutBtn.disabled = selectedItems.length === 0;
+        }
+
+        syncCartSelectAllState();
+      }
+
+      function renderOrderPage() {
+        const listEl = document.getElementById("order-list");
+        const orderItems = readList(getStorageKey("appleStoreOrders"));
+
+        if (!orderItems.length) {
+          listEl.innerHTML = '<p class="empty-tip">你还没有订单，完成一次购买后会显示在这里。</p>';
+          return;
+        }
+
+        listEl.innerHTML = orderItems
+          .map(
+            (item) => `
+            <div class="account-item">
+              <div>
+                <p class="item-title">${item.name}</p>
+                <p class="item-meta">${item.selection || "默认配置"}</p>
+                <p class="item-meta">RMB ${item.price}</p>
+                <p class="item-meta">支付时间：${item.createdAt}</p>
+              </div>
+            </div>
+          `,
+          )
+          .join("");
+      }
+
+      function openCartPage() {
+        if (!ensureLoggedIn()) {
+          return;
+        }
+        hideAllMainPages();
+        document.getElementById("cart-page").style.display = "block";
+        renderCartPage();
+      }
+
+      function openOrderPage() {
+        if (!ensureLoggedIn()) {
+          return;
+        }
+        hideAllMainPages();
+        document.getElementById("order-page").style.display = "block";
+        renderOrderPage();
+      }
+
+      function openPasswordPage() {
+        if (!ensureLoggedIn()) {
+          return;
+        }
+        hideAllMainPages();
+        document.getElementById("password-page").style.display = "block";
+      }
+
+      function removeCartItem(index) {
+        const key = getStorageKey("appleStoreCart");
+        const cartItems = readList(key);
+        cartItems.splice(index, 1);
+        writeList(key, cartItems);
+        renderCartPage();
+      }
+
+      function checkoutSelectedFromCart() {
+        if (!ensureLoggedIn()) {
+          return;
+        }
+
+        const cartKey = getStorageKey("appleStoreCart");
+        const orderKey = getStorageKey("appleStoreOrders");
+        const cartItems = readList(cartKey);
+        const selectedIndexes = getSelectedCartIndexes().sort((a, b) => a - b);
+
+        if (!selectedIndexes.length) {
+          alert("请先选择要结算的商品。");
+          return;
+        }
+
+        const checkoutItems = selectedIndexes
+          .map((index) => cartItems[index])
+          .filter(Boolean)
+          .map((item) => ({
+            ...item,
+            createdAt: new Date().toLocaleString("zh-CN"),
+          }));
+
+        const remainItems = cartItems.filter((_, index) => !selectedIndexes.includes(index));
+        const orderItems = readList(orderKey);
+
+        writeList(orderKey, orderItems.concat(checkoutItems));
+        writeList(cartKey, remainItems);
+
+        alert("所选商品结算成功，已移入订单页面。");
+        openOrderPage();
+      }
+
+      function addCurrentProductToCart() {
+        if (!ensureLoggedIn()) {
+          return;
+        }
+        if (!currentProductId) {
+          return;
+        }
+        const key = getStorageKey("appleStoreCart");
+        const cartItems = readList(key);
+        cartItems.push(buildCurrentItem());
+        writeList(key, cartItems);
+        alert("已加入购物车，可在头像菜单的“购物车”中查看。");
+      }
+
+      function checkoutCurrentProduct() {
+        if (!ensureLoggedIn()) {
+          return;
+        }
+        if (!currentProductId) {
+          return;
+        }
+        const orderKey = getStorageKey("appleStoreOrders");
+        const orderItems = readList(orderKey);
+        orderItems.push(buildCurrentItem());
+        writeList(orderKey, orderItems);
+        alert("支付成功！你可以在“查看订单”中查看订单记录。");
+        openOrderPage();
+      }
+
+      function logoutUser() {
+        localStorage.removeItem("appleStoreAccount");
+        initAuthNav();
+        alert("已退出登录");
+        window.location.href = "login.html";
+      }
+
+      function updateWatchTopPriceByMax() {
+        const maxPrice = Math.max(
+          currentWatchSelection.material || 0,
+          currentWatchSelection.size || 0,
+          currentWatchSelection.connection || 0,
+        );
+        document.querySelector(".purchase-price").innerText =
+          "RMB " + maxPrice + " 起";
+      }
+
+      // --- 功能：从选购页跳转到购买详情页，并自动填充对应的数据 ---
+      function buyProduct(productId) {
+        // 1. 调出对应产品的资料库
+        const data = productData[productId];
+        if (!data) {
+          return;
+        }
+        currentCategory = data.category;
+        currentProductId = productId;
+
+        // 2. 替换页面上的文字和主图
+        document.querySelector(".purchase-title").innerText = data.name;
+        document.querySelector(".purchase-price").innerText =
+          "RMB " + data.price + " 起";
+        document.getElementById("large-product-image").src =
+          `../images/${data.baseImage}`;
+
+        const appearanceSection = document.getElementById("appearance-section");
+        const appearanceTitle = document.getElementById(
+          "dynamic-appearance-title",
+        );
+        const specSection = document.getElementById("spec-section");
+        const specTitle = document.getElementById("dynamic-spec-title");
+        const connectionSection = document.getElementById("connection-section");
+        const connectionContainer = document.getElementById(
+          "dynamic-connection-options",
+        );
+        if (data.storageMode === "watch-material") {
+          appearanceTitle.innerText = data.appearanceTitle || "表壳材质";
+          appearanceSection.style.display = "block";
+          specSection.style.display = "block";
+          specTitle.innerText = data.specTitle || "表壳尺寸";
+          connectionSection.style.display =
+            data.showConnection === false ? "none" : "block";
+        } else if (data.storageMode === "airpods-model") {
+          appearanceTitle.innerText = "外观";
+          appearanceSection.style.display = "none";
+          specSection.style.display = "block";
+          specTitle.innerText = "选择你的机型";
+          connectionSection.style.display = "none";
+          connectionContainer.innerHTML = "";
+        } else if (data.storageMode === "color-only") {
+          appearanceTitle.innerText = "选择颜色";
+          appearanceSection.style.display = "block";
+          specSection.style.display = "none";
+          connectionSection.style.display = "none";
+          connectionContainer.innerHTML = "";
+        } else {
+          appearanceTitle.innerText = "外观";
+          appearanceSection.style.display = "block";
+          specSection.style.display = "block";
+          specTitle.innerText = "存储容量";
+          connectionSection.style.display = "none";
+          connectionContainer.innerHTML = "";
+        }
+
+        // 返回按钮按当前分类显示
+        const backButton = document.querySelector(".back-btn");
+        if (currentCategory === "ipad") {
+          backButton.innerText = "< 返回 iPad 选购";
+        } else if (currentCategory === "iphone") {
+          backButton.innerText = "< 返回 iPhone 选购";
+        } else if (currentCategory === "watch") {
+          backButton.innerText = "< 返回 Apple Watch 选购";
+        } else if (currentCategory === "airpods") {
+          backButton.innerText = "< 返回 AirPods 选购";
+        } else {
+          backButton.innerText = "< 返回 Mac 选购";
+        }
+
+        // 3. 动态生成方形的颜色选项框
+        const colorContainer = document.getElementById("dynamic-color-options");
+        colorContainer.innerHTML = ""; // 清空上一次的选项
+
+        const appearanceOptions =
+          data.storageMode === "watch-material" ? data.materials : data.colors;
+        appearanceOptions.forEach((color, index) => {
+          // 默认选中第一个颜色
+          const activeClass = index === 0 ? "active" : "";
+          let boxHTML = "";
+          if (data.storageMode === "watch-material") {
+            const descriptionHTML = color.description
+              ? `<span class="extra-price">${color.description}</span>`
+              : "";
+            const onclickAttr = data.materialLocked
+              ? ""
+              : `onclick=\"selectWatchOption(this, ${color.price}, 'material', '${color.file || ""}')\"`;
+            boxHTML = `
+            <div class="storage-box ${activeClass}" ${onclickAttr}>
+                <span class="capacity">${color.capacity}</span>
+                <span class="extra-price">${color.installment}</span>
+                <span class="extra-price">${color.displayPrice}</span>
+                ${descriptionHTML}
+            </div>
+        `;
+          } else {
+            // 借用 storage-box 的样式来做颜色选择框
+            boxHTML = `
+            <div class="storage-box ${activeClass}" onclick="selectPurchaseColor(this, '${color.file}')">
+                <span class="capacity">${color.name}</span>
+            </div>
+        `;
+          }
+          // 把这段 HTML 塞进页面里
+          colorContainer.innerHTML += boxHTML;
+        });
+
+        // 4. 动态生成存储容量选项
+        const storageContainer = document.getElementById(
+          "dynamic-spec-options",
+        );
+        storageContainer.innerHTML = ""; // 清空上一次的选项
+
+        const specOptions =
+          data.storageMode === "watch-material"
+            ? data.sizes
+            : data.storageMode === "airpods-model"
+              ? data.models
+              : data.storages;
+
+        specOptions.forEach((storage, index) => {
+          // 默认选中第一个存储
+          const activeClass = index === 0 ? "active" : "";
+          let priceHTML = "";
+          if (data.storageMode === "absolute") {
+            priceHTML = `<span class="extra-price">RMB ${storage.price}</span>`;
+          } else if (data.storageMode === "airpods-model") {
+            if (storage.installment && storage.displayPrice) {
+              priceHTML = `<span class="extra-price">${storage.installment}</span><span class="extra-price">${storage.displayPrice}</span>`;
+            } else {
+              priceHTML = `<span class="extra-price">RMB ${storage.price}</span>`;
+            }
+          } else if (data.storageMode === "watch-material") {
+            priceHTML = `<span class="extra-price">${storage.installment}</span><span class="extra-price">${storage.displayPrice}</span><span class="extra-price">${storage.description || ""}</span>`;
+          } else {
+            priceHTML =
+              storage.price > 0
+                ? `<span class="extra-price">+ RMB ${storage.price}</span>`
+                : "";
+          }
+          const boxHTML = `
+            <div class="storage-box ${activeClass}" onclick="${data.storageMode === "watch-material" ? `selectWatchOption(this, ${storage.price}, 'size')` : `selectStorage(this, ${storage.price}, '${data.storageMode}', '${storage.file || ""}')`}" >
+                <span class="capacity">${storage.capacity}</span>
+                ${priceHTML}
+            </div>
+        `;
+          // 把这段 HTML 塞进页面里
+          storageContainer.innerHTML += boxHTML;
+        });
+
+        if (data.storageMode === "watch-material") {
+          connectionContainer.innerHTML = "";
+          if (data.showConnection !== false) {
+            data.connections.forEach((item, index) => {
+              const activeClass = index === 0 ? "active" : "";
+              const boxHTML = `
+            <div class="storage-box ${activeClass}" onclick="selectWatchOption(this, ${item.price}, 'connection')">
+                <span class="capacity">${item.capacity}</span>
+                <span class="extra-price">${item.installment}</span>
+                <span class="extra-price">${item.displayPrice}</span>
+            </div>
+        `;
+              connectionContainer.innerHTML += boxHTML;
+            });
+          }
+
+          currentWatchSelection.material = data.materials[0]?.price || 0;
+          currentWatchSelection.size = data.sizes[0]?.price || 0;
+          currentWatchSelection.connection =
+            data.showConnection === false ? 0 : data.connections[0]?.price || 0;
+          updateWatchTopPriceByMax();
+        }
+
+        if (data.storageMode === "airpods-model" && data.models.length > 0) {
+          document.querySelector(".purchase-price").innerText =
+            "RMB " + data.models[0].price;
+          document.getElementById("large-product-image").src =
+            `../images/${data.models[0].file}`;
+        }
+
+        // 5. iPad 选容量时显示对应总价
+        if (data.storageMode === "absolute" && data.storages.length > 0) {
+          document.querySelector(".purchase-price").innerText =
+            "RMB " + data.storages[0].price;
+        }
+
+        // 6. 切换页面显示
+        document.getElementById("mac-page").style.display = "none";
+        document.getElementById("iPad-page").style.display = "none";
+        document.getElementById("watch-page").style.display = "none";
+        document.getElementById("iphone-page").style.display = "none";
+        document.getElementById("airpods-page").style.display = "none";
+        document.getElementById("purchase-page").style.display = "block";
+        window.scrollTo(0, 0); // 滚回顶部
+      }
+
+      // --- 功能：在购买详情页，点击方框切换产品图 ---
+      function selectPurchaseColor(clickedBox, fileName) {
+        // 换大图
+        document.getElementById("large-product-image").src =
+          `../images/${fileName}`;
+
+        // 改变被点击方框的蓝底框状态
+        const boxes =
+          clickedBox.parentElement.getElementsByClassName("storage-box");
+        for (let i = 0; i < boxes.length; i++) {
+          boxes[i].classList.remove("active");
+        }
+        clickedBox.classList.add("active");
+      }
+
+      function selectWatchOption(clickedBox, price, group, fileName = "") {
+        const boxes =
+          clickedBox.parentElement.getElementsByClassName("storage-box");
+        for (let i = 0; i < boxes.length; i++) {
+          boxes[i].classList.remove("active");
+        }
+        clickedBox.classList.add("active");
+
+        if (fileName) {
+          document.getElementById("large-product-image").src =
+            `../images/${fileName}`;
+        }
+
+        if (group === "material") {
+          currentWatchSelection.material = price;
+        } else if (group === "size") {
+          currentWatchSelection.size = price;
+        } else if (group === "connection") {
+          currentWatchSelection.connection = price;
+        }
+
+        updateWatchTopPriceByMax();
+      }
+
+      // --- 从购买页返回对应列表页 ---
+      function goBackToMac() {
+        document.getElementById("purchase-page").style.display = "none";
+        document.getElementById("mac-page").style.display =
+          currentCategory === "mac" ? "block" : "none";
+        document.getElementById("iPad-page").style.display =
+          currentCategory === "ipad" ? "block" : "none";
+        document.getElementById("watch-page").style.display =
+          currentCategory === "watch" ? "block" : "none";
+        document.getElementById("iphone-page").style.display =
+          currentCategory === "iphone" ? "block" : "none";
+        document.getElementById("airpods-page").style.display =
+          currentCategory === "airpods" ? "block" : "none";
+      }
+
+      // --- 点击存储容量：切换选中，并按模式刷新价格 ---
+      function selectStorage(
+        clickedBox,
+        storagePrice = 0,
+        storageMode = "surcharge",
+        fileName = "",
+      ) {
+        const boxes =
+          clickedBox.parentElement.getElementsByClassName("storage-box");
+        for (let i = 0; i < boxes.length; i++) {
+          boxes[i].classList.remove("active");
+        }
+        clickedBox.classList.add("active");
+
+        if (fileName) {
+          document.getElementById("large-product-image").src =
+            `../images/${fileName}`;
+        }
+
+        if (storageMode === "absolute") {
+          document.querySelector(".purchase-price").innerText =
+            "RMB " + storagePrice;
+        } else if (storageMode === "airpods-model") {
+          document.querySelector(".purchase-price").innerText =
+            "RMB " + storagePrice;
+        } else if (storageMode === "watch-material") {
+          document.querySelector(".purchase-price").innerText =
+            "RMB " + storagePrice + " 起";
+        }
+      }
+
+      function showWatchTip() {
+        alert("Apple Watch 购买详情页即将上线，敬请期待。");
+      }
+
+      function showAirPodsTip() {
+        alert("AirPods 购买详情页即将上线，敬请期待。");
+      }
+
+      // 1. 确保在页面加载完后执行
+      // 1. 确保在页面加载完后执行
+      window.onload = function () {
+        initAuthNav();
+
+        const addToCartBtn = document.querySelector(".add-to-cart-btn");
+        const checkoutBtn = document.querySelector(".checkout-btn");
+        const menuCart = document.getElementById("menu-cart");
+        const menuOrders = document.getElementById("menu-orders");
+        const menuPassword = document.getElementById("menu-password");
+        const menuLogout = document.getElementById("menu-logout");
+        const cartSelectAll = document.getElementById("cart-select-all");
+        const cartCheckoutSelectedBtn = document.getElementById("cart-checkout-selected-btn");
+        const passwordForm = document.getElementById("password-form");
+
+        if (addToCartBtn) {
+          addToCartBtn.addEventListener("click", addCurrentProductToCart);
+        }
+        if (checkoutBtn) {
+          checkoutBtn.addEventListener("click", checkoutCurrentProduct);
+        }
+        if (menuCart) {
+          menuCart.addEventListener("click", openCartPage);
+        }
+        if (menuOrders) {
+          menuOrders.addEventListener("click", openOrderPage);
+        }
+        if (menuPassword) {
+          menuPassword.addEventListener("click", openPasswordPage);
+        }
+        if (menuLogout) {
+          menuLogout.addEventListener("click", logoutUser);
+        }
+        if (cartSelectAll) {
+          cartSelectAll.addEventListener("change", (event) => {
+            toggleSelectAllCart(event.target.checked);
+          });
+        }
+        if (cartCheckoutSelectedBtn) {
+          cartCheckoutSelectedBtn.addEventListener("click", checkoutSelectedFromCart);
+        }
+        if (passwordForm) {
+          passwordForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const oldPassword = document.getElementById("old-password").value;
+            const newPassword = document.getElementById("new-password").value;
+            const confirmNewPassword = document.getElementById("confirm-new-password").value;
+            const tip = document.getElementById("password-tip");
+
+            if (newPassword !== confirmNewPassword) {
+              tip.textContent = "两次输入的新密码不一致";
+              tip.className = "form-tip error";
+              return;
+            }
+
+            try {
+              const response = await fetch("http://127.0.0.1:3100/api/change-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  account: getCurrentAccount(),
+                  oldPassword,
+                  newPassword,
+                  confirmNewPassword,
+                }),
+              });
+              const text = await response.text();
+              let data = {};
+              if (text) {
+                try {
+                  data = JSON.parse(text);
+                } catch (_error) {
+                  data = { message: "服务响应格式异常，请重试" };
+                }
+              }
+              if (!response.ok) {
+                tip.textContent = data.message || "修改失败，请稍后重试";
+                tip.className = "form-tip error";
+                return;
+              }
+              passwordForm.reset();
+              tip.textContent = (data.message || "密码修改成功") + "，即将退出登录";
+              tip.className = "form-tip success";
+              localStorage.removeItem("appleStoreAccount");
+              initAuthNav();
+              setTimeout(() => {
+                window.location.href = "login.html";
+              }, 1200);
+            } catch (_error) {
+              tip.textContent = "网络异常，请稍后重试";
+              tip.className = "form-tip error";
+            }
+          });
+        }
+
+        // 获取导航栏按钮 (注意严格对应 HTML 里的 id)
+        const btnMac = document.getElementById("nav-mac");
+        const btniPad = document.getElementById("nav-ipad"); // 修复：全小写
+        const btniPhone = document.getElementById("nav-iphone");
+        const btnWatch = document.getElementById("nav-Watch");
+        const btnAirPods = document.getElementById("nav-AirPods");
+        const btnLogo = document.getElementById("nav-logo");
+
+        // 获取所有页面容器
+        const home = document.getElementById("home-page");
+        const mac = document.getElementById("mac-page");
+        const ipad = document.getElementById("iPad-page"); // 修复：获取了 iPad 页面 (你的 HTML 里是 iPad-page)
+        const watch = document.getElementById("watch-page");
+        const iphone = document.getElementById("iphone-page");
+        const airpods = document.getElementById("airpods-page");
+        const purchase = document.getElementById("purchase-page"); // 获取购买页，方便切换时隐藏
+
+        // 点击 Mac 导航
+        if (btnMac) {
+          btnMac.onclick = function () {
+            document.getElementById("cart-page").style.display = "none";
+            document.getElementById("order-page").style.display = "none";
+            document.getElementById("password-page").style.display = "none";
+            home.style.display = "none";
+            ipad.style.display = "none"; // 隐藏 iPad 页
+            watch.style.display = "none";
+            iphone.style.display = "none";
+            airpods.style.display = "none";
+            purchase.style.display = "none"; // 隐藏购买页
+            mac.style.display = "block"; // 显示 Mac 页
+          };
+        }
+
+        // 点击 iPad 导航
+        if (btniPad) {
+          btniPad.onclick = function () {
+            document.getElementById("cart-page").style.display = "none";
+            document.getElementById("order-page").style.display = "none";
+            document.getElementById("password-page").style.display = "none";
+            home.style.display = "none";
+            mac.style.display = "none"; // 隐藏 Mac 页
+            watch.style.display = "none";
+            iphone.style.display = "none";
+            airpods.style.display = "none";
+            purchase.style.display = "none"; // 隐藏购买页
+            ipad.style.display = "block"; // 显示 iPad 页
+          };
+        }
+
+        // 点击 Watch 导航
+        if (btnWatch) {
+          btnWatch.onclick = function () {
+            document.getElementById("cart-page").style.display = "none";
+            document.getElementById("order-page").style.display = "none";
+            document.getElementById("password-page").style.display = "none";
+            home.style.display = "none";
+            mac.style.display = "none";
+            ipad.style.display = "none";
+            iphone.style.display = "none";
+            airpods.style.display = "none";
+            purchase.style.display = "none";
+            watch.style.display = "block";
+          };
+        }
+
+        // 点击 AirPods 导航
+        if (btnAirPods) {
+          btnAirPods.onclick = function () {
+            document.getElementById("cart-page").style.display = "none";
+            document.getElementById("order-page").style.display = "none";
+            document.getElementById("password-page").style.display = "none";
+            home.style.display = "none";
+            mac.style.display = "none";
+            ipad.style.display = "none";
+            watch.style.display = "none";
+            iphone.style.display = "none";
+            purchase.style.display = "none";
+            airpods.style.display = "block";
+          };
+        }
+
+        // 点击 iPhone 导航
+        if (btniPhone) {
+          btniPhone.onclick = function () {
+            document.getElementById("cart-page").style.display = "none";
+            document.getElementById("order-page").style.display = "none";
+            document.getElementById("password-page").style.display = "none";
+            home.style.display = "none";
+            mac.style.display = "none";
+            ipad.style.display = "none";
+            watch.style.display = "none";
+            airpods.style.display = "none";
+            purchase.style.display = "none";
+            iphone.style.display = "block";
+          };
+        }
+
+        // 点击 Logo 回首页
+        if (btnLogo) {
+          btnLogo.onclick = function () {
+            document.getElementById("cart-page").style.display = "none";
+            document.getElementById("order-page").style.display = "none";
+            document.getElementById("password-page").style.display = "none";
+            mac.style.display = "none";
+            ipad.style.display = "none";
+            watch.style.display = "none";
+            iphone.style.display = "none";
+            airpods.style.display = "none";
+            purchase.style.display = "none";
+            home.style.display = "block";
+          };
+        }
+
+        const tab = new URLSearchParams(window.location.search).get("tab");
+        if (tab === "mac" && btnMac) {
+          btnMac.onclick();
+        } else if (tab === "ipad" && btniPad) {
+          btniPad.onclick();
+        } else if (tab === "iphone" && btniPhone) {
+          btniPhone.onclick();
+        } else if (tab === "watch" && btnWatch) {
+          btnWatch.onclick();
+        } else if (tab === "airpods" && btnAirPods) {
+          btnAirPods.onclick();
+        }
+      };
+
+      function initAuthNav() {
+        const navLogin = document.getElementById("nav-login");
+        const navRegister = document.getElementById("nav-register");
+        const navUser = document.getElementById("nav-user");
+        const userLink = navUser ? navUser.querySelector("a") : null;
+        const account = localStorage.getItem("appleStoreAccount");
+
+        if (!navLogin || !navRegister || !navUser) {
+          return;
+        }
+
+        if (account) {
+          navLogin.classList.add("auth-hidden");
+          navRegister.classList.add("auth-hidden");
+          navUser.classList.remove("auth-hidden");
+          if (userLink) {
+            userLink.title = `已登录：${account}`;
+          }
+          return;
+        }
+
+        navLogin.classList.remove("auth-hidden");
+        navRegister.classList.remove("auth-hidden");
+        navUser.classList.add("auth-hidden");
+      }
+    </script>
+  </body>
+</html>
