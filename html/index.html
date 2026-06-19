@@ -4179,10 +4179,8 @@
       function showAirPodsTip() {
         alert("AirPods 购买详情页即将上线，敬请期待。");
       }
-      window.onload = async function () {
+      window.onload = function () {
         initAuthNav();
-        await ensureProductCatalogInDatabase();
-        await loadUserStoreFromDatabase();
 
         const addToCartBtn = document.querySelector(".add-to-cart-btn");
         const checkoutBtn = document.querySelector(".checkout-btn");
@@ -4463,6 +4461,11 @@
         }
 
         runProductSearch();
+
+        (async () => {
+          await ensureProductCatalogInDatabase();
+          await loadUserStoreFromDatabase();
+        })();
       };
 
       function initAuthNav() {
