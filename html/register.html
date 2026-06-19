@@ -86,7 +86,7 @@
             const registerPasswordInput = document.getElementById("register-password");
             const registerConfirmInput = document.getElementById("register-confirm-password");
             const registerTip = document.getElementById("register-tip");
-                const API_BASE = "http://127.0.0.1:3100";
+                const API_BASE = window.location.origin;
             initAuthNav();
 
             function normalizeAccount(value) {

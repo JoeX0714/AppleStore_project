@@ -56,6 +56,8 @@
             <ul class="user-menu">
               <li><button id="menu-cart" type="button">购物车</button></li>
               <li><button id="menu-orders" type="button">查看订单</button></li>
+              <li><button id="menu-addresses" type="button">收货地址</button></li>
+              <li id="menu-admin-item" class="auth-hidden"><button id="menu-admin" type="button">后台管理</button></li>
               <li><button id="menu-password" type="button">修改密码</button></li>
               <li><button id="menu-logout" type="button">退出登录</button></li>
             </ul>
@@ -94,6 +96,31 @@
         <div id="order-list" class="account-list"></div>
       </div>
 
+      <div id="address-page" class="account-page" style="display: none">
+        <div class="account-page-header">
+          <h2>收货地址</h2>
+          <button type="button" class="account-back-btn" onclick="showHomePage()">返回首页</button>
+        </div>
+        <form id="address-form" class="address-form">
+          <input id="address-id" type="hidden" />
+          <input id="address-receiver" type="text" placeholder="收件人" required />
+          <input id="address-phone" type="tel" placeholder="联系电话" required />
+          <input id="address-province" type="text" placeholder="省份" required />
+          <input id="address-city" type="text" placeholder="城市" required />
+          <input id="address-district" type="text" placeholder="区县" />
+          <input id="address-detail" type="text" placeholder="详细地址" required />
+          <label class="address-default-check">
+            <input id="address-default" type="checkbox" />
+            设为默认地址
+          </label>
+          <div class="address-actions">
+            <button type="submit" class="buy-btn">保存地址</button>
+            <button id="address-reset-btn" type="button" class="account-back-btn">清空</button>
+          </div>
+        </form>
+        <div id="address-list" class="account-list"></div>
+      </div>
+
       <div id="password-page" class="account-page password-page" style="display: none">
         <div class="account-page-header">
           <h2>修改密码</h2>
@@ -109,9 +136,35 @@
       </div>
 
       <div id="home-page">
-        <div style="padding-top: 200px; text-align: center">
+        <div style="padding-top: 120px; text-align: center">
           <h1>欢迎来到 Apple Store</h1>
           <p>请点击导航栏上的商品开始选购</p>
+        </div>
+      </div>
+
+      <div id="checkout-address-modal" class="checkout-address-modal" style="display: none">
+        <div class="checkout-address-dialog">
+          <h2 id="checkout-address-title">填写收货地址</h2>
+          <p id="checkout-address-tip" class="item-meta">当前账号没有默认地址，请先填写地址后继续结账。</p>
+          <div id="checkout-default-panel" class="checkout-default-panel" style="display: none">
+            <p id="checkout-default-address" class="checkout-default-address"></p>
+            <div class="address-actions">
+              <button id="checkout-use-default" type="button" class="buy-btn">使用默认地址</button>
+              <button id="checkout-input-new" type="button" class="account-back-btn">输入新地址</button>
+            </div>
+          </div>
+          <form id="checkout-address-form" class="address-form" style="display: none">
+            <input id="checkout-address-receiver" type="text" placeholder="收件人" required />
+            <input id="checkout-address-phone" type="tel" placeholder="联系电话" required />
+            <input id="checkout-address-province" type="text" placeholder="省份" required />
+            <input id="checkout-address-city" type="text" placeholder="城市" required />
+            <input id="checkout-address-district" type="text" placeholder="区县" />
+            <input id="checkout-address-detail" type="text" placeholder="详细地址" required />
+            <div class="address-actions">
+              <button type="submit" class="buy-btn">保存并结账</button>
+              <button id="checkout-address-cancel" type="button" class="account-back-btn">取消</button>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -532,6 +585,7 @@
             <div class="purchase-right">
               <h1 class="purchase-title">MacBook Neo</h1>
               <p class="purchase-price">RMB 4599</p>
+              <p id="purchase-stock-status" class="purchase-stock-status">库存加载中</p>
 
               <div id="appearance-section" class="options-section">
                 <h3 id="dynamic-appearance-title">外观</h3>
@@ -559,6 +613,41 @@
                 <button class="add-to-cart-btn">加入购物车</button>
                 <button class="checkout-btn">结账</button>
               </div>
+
+              <section class="comment-section" id="product-comment-section">
+                <div class="comment-header">
+                  <h3>用户评论</h3>
+                  <div class="comment-header-right">
+                    <span id="comment-count" class="comment-count">0 条</span>
+                    <label class="comment-sort-label" for="comment-sort-select">排序</label>
+                    <select id="comment-sort-select" class="comment-sort-select">
+                      <option value="time">按时间</option>
+                      <option value="likes">按点赞</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="comment-list" class="comment-list">
+                  <p class="empty-tip">还没有评论，快来发表第一条吧。</p>
+                </div>
+                <div class="comment-pagination" id="comment-pagination">
+                  <button type="button" class="comment-page-btn" id="comment-prev-btn">上一页</button>
+                  <span id="comment-page-info" class="comment-page-info">第 1 / 1 页</span>
+                  <button type="button" class="comment-page-btn" id="comment-next-btn">下一页</button>
+                </div>
+                <div class="comment-compose">
+                  <textarea
+                    id="comment-input"
+                    maxlength="500"
+                    placeholder="写下你对这款产品的看法（最多 500 字）"
+                  ></textarea>
+                  <div class="comment-compose-footer">
+                    <span class="comment-login-tip">发表评论需要登录</span>
+                    <button type="button" id="comment-submit-btn" class="buy-btn">
+                      发布评论
+                    </button>
+                  </div>
+                </div>
+              </section>
             </div>
           </div>
         </div>
@@ -2016,26 +2105,19 @@
           </div>
         </div>
       </div>
+
     </main>
 
     <script>
-      // --- 功能 1：点击颜色小点切换图片 ---
       function changeColor(clickedDot, fileName, imageId) {
-        // 1. 根据传入的 imageId 找到对应的图片标签 (比如 'neo-image' 或 'air-image')
         const mainImg = document.getElementById(imageId);
-
-        // 2. 直接将传入的文件名拼接到路径后
         mainImg.src = `../images/${fileName}`;
-
-        // 3. 改变同一组小点点的“选中”状态
         const dots = clickedDot.parentElement.getElementsByClassName("dot");
         for (let i = 0; i < dots.length; i++) {
           dots[i].classList.remove("active");
         }
         clickedDot.classList.add("active");
       }
-
-      // --- 终极版：产品数据库，记录了每个产品的详细信息 ---
       const productData = {
         neo: {
           category: "mac",
@@ -2081,7 +2163,7 @@
           baseImage: "mac-pro-black.jpg",
           colors: [
             { name: "深空黑色", file: "MacBook Pro-space black.jpg" },
-            { name: "银色", file: "MacBook Pro-silver.jpg" }, // Pro 只有两个颜色
+            { name: "银色", file: "MacBook Pro-silver.jpg" }, 
           ],
           storages: [
             { capacity: "1TB 统一内存", price: 0 },
@@ -2467,11 +2549,552 @@
 
       let currentCategory = "mac";
       let currentProductId = "";
+      let currentProductSkus = [];
+      let currentSku = null;
+      let addressCache = [];
       let currentWatchSelection = {
         material: 0,
         size: 0,
         connection: 0,
       };
+      const API_BASE = window.location.origin;
+      const commentDraftMap = {};
+      const commentListState = {
+        page: 1,
+        pageSize: 5,
+        totalPages: 1,
+        sortBy: "time",
+      };
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function formatDateTime(value) {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+          return "刚刚";
+        }
+        return date.toLocaleString("zh-CN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      function buildCommentHtml(comment, isReply) {
+        const account = getCurrentAccount();
+        const canReply = !!account;
+        const canDelete = !!account && account === comment.account;
+        const safeContent = escapeHtml(comment.content).replace(/\n/g, "<br>");
+        const likedClass = comment.likedByMe ? "liked" : "";
+
+        return `
+          <article class="comment-item ${isReply ? "comment-reply-item" : ""}" data-comment-id="${comment.id}">
+            <div class="comment-main">
+              <div class="comment-meta">
+                <span class="comment-author">${escapeHtml(comment.account)}</span>
+                <span class="comment-time">${formatDateTime(comment.createdAt)}</span>
+              </div>
+              <p class="comment-content">${safeContent}</p>
+              <div class="comment-actions">
+                <button type="button" class="comment-action ${likedClass}" onclick="toggleCommentLike(${comment.id})">
+                  👍 ${comment.likeCount || 0}
+                </button>
+                <button type="button" class="comment-action" onclick="toggleReplyBox(${comment.id})">
+                  回复
+                </button>
+                ${canDelete ? `<button type="button" class="comment-action comment-delete" onclick="deleteComment(${comment.id})">删除</button>` : ""}
+                ${!canReply ? '<span class="comment-login-tip">登录后可回复</span>' : ""}
+              </div>
+              <div class="comment-reply-editor" id="reply-editor-${comment.id}" style="display: none">
+                <textarea id="reply-input-${comment.id}" maxlength="500" placeholder="回复这条评论（最多 500 字）"></textarea>
+                <div class="comment-reply-footer">
+                  <button type="button" class="buy-btn" onclick="submitReply(${comment.id})">发布回复</button>
+                </div>
+              </div>
+            </div>
+            ${Array.isArray(comment.replies) && comment.replies.length
+              ? `<div class="comment-replies">${comment.replies
+                  .map((reply) => buildCommentHtml(reply, true))
+                  .join("")}</div>`
+              : ""}
+          </article>
+        `;
+      }
+
+      async function apiGet(url) {
+        const response = await fetch(`${API_BASE}${url}`);
+        const text = await response.text();
+        let data = {};
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch (_error) {
+            data = { message: "服务响应格式异常，请重试" };
+          }
+        }
+        return { ok: response.ok, data };
+      }
+
+      async function apiPost(url, payload) {
+        const response = await fetch(`${API_BASE}${url}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const text = await response.text();
+        let data = {};
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch (_error) {
+            data = { message: "服务响应格式异常，请重试" };
+          }
+        }
+        return { ok: response.ok, data };
+      }
+
+      async function apiPut(url, payload) {
+        const response = await fetch(`${API_BASE}${url}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const text = await response.text();
+        let data = {};
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch (_error) {
+            data = { message: "服务响应格式异常，请重试" };
+          }
+        }
+        return { ok: response.ok, data };
+      }
+
+      async function apiDelete(url, payload) {
+        const response = await fetch(`${API_BASE}${url}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const text = await response.text();
+        let data = {};
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch (_error) {
+            data = { message: "服务响应格式异常，请重试" };
+          }
+        }
+        return { ok: response.ok, data };
+      }
+
+      function updateCommentPaginationUi() {
+        const pageInfoEl = document.getElementById("comment-page-info");
+        const prevBtn = document.getElementById("comment-prev-btn");
+        const nextBtn = document.getElementById("comment-next-btn");
+        if (!pageInfoEl || !prevBtn || !nextBtn) {
+          return;
+        }
+
+        const totalPages = Math.max(Number(commentListState.totalPages || 1), 1);
+        const page = Math.min(Math.max(Number(commentListState.page || 1), 1), totalPages);
+        pageInfoEl.innerText = `第 ${page} / ${totalPages} 页`;
+        prevBtn.disabled = page <= 1;
+        nextBtn.disabled = page >= totalPages;
+      }
+
+      function resetCommentPage() {
+        commentListState.page = 1;
+      }
+
+      function replaceProductDataWithDbProducts(dbProducts) {
+        const incoming = dbProducts && typeof dbProducts === "object" ? dbProducts : {};
+        const keys = Object.keys(productData);
+        keys.forEach((key) => {
+          delete productData[key];
+        });
+        Object.entries(incoming).forEach(([key, value]) => {
+          productData[key] = value;
+        });
+      }
+
+      function toImageSrc(imageFile) {
+        const value = String(imageFile || "").trim();
+        if (!value) {
+          return "../images/Apple-Logo.png";
+        }
+        if (/^https?:\/\//i.test(value) || value.startsWith("../") || value.startsWith("/")) {
+          return value;
+        }
+        return `../images/${value}`;
+      }
+
+      function renderDatabaseProductCards() {
+        document.querySelectorAll(".db-product-card").forEach((item) => item.remove());
+        const pageMap = {
+          mac: "mac-page",
+          ipad: "iPad-page",
+          iphone: "iphone-page",
+          watch: "watch-page",
+          airpods: "airpods-page",
+        };
+        Object.entries(productData).forEach(([productId, product]) => {
+          if (!product || !product.category || !pageMap[product.category]) {
+            return;
+          }
+          if (document.querySelector(`[onclick*="buyProduct('${productId}')"]`)) {
+            return;
+          }
+          const grid = document.querySelector(`#${pageMap[product.category]} .product-grid`);
+          if (!grid) {
+            return;
+          }
+          const imageFile = product.baseImage || (product.colors && product.colors[0] && product.colors[0].file) || "Apple-Logo.png";
+          const card = document.createElement("div");
+          card.className = "product-card db-product-card";
+          card.innerHTML = `
+            <div class="db-product-copy">
+              <span class="tag">新入库</span>
+              <h3>${escapeHtml(product.name || productId)}</h3>
+            </div>
+            <img src="${escapeHtml(toImageSrc(imageFile))}" alt="${escapeHtml(product.name || productId)}" />
+            <div class="product-cta">
+              <div class="price-info">
+                <p class="price">RMB ${Number(product.price || 0)} 起</p>
+              </div>
+              <button class="buy-btn" type="button" onclick="buyProduct('${escapeHtml(productId)}')">购买</button>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      }
+
+      async function ensureProductCatalogInDatabase() {
+        try {
+          const result = await apiGet("/api/products/catalog");
+          if (result.ok && result.data && result.data.products && Object.keys(result.data.products).length) {
+            replaceProductDataWithDbProducts(result.data.products);
+            renderDatabaseProductCards();
+            return;
+          }
+
+          await apiPost("/api/products/catalog/sync", { products: productData });
+          const refresh = await apiGet("/api/products/catalog");
+          if (refresh.ok && refresh.data && refresh.data.products && Object.keys(refresh.data.products).length) {
+            replaceProductDataWithDbProducts(refresh.data.products);
+            renderDatabaseProductCards();
+          }
+        } catch (_error) {
+        }
+      }
+
+      async function loadUserStoreFromDatabase() {
+        const account = getCurrentAccount();
+        if (!account) {
+          return;
+        }
+
+        try {
+          const { ok, data } = await apiGet(`/api/user-store/${encodeURIComponent(account)}`);
+          if (!ok) {
+            return;
+          }
+
+          const cart = Array.isArray(data.cart) ? data.cart : [];
+          const orders = Array.isArray(data.orders) ? data.orders : [];
+          localStorage.setItem(getStorageKey("appleStoreCart"), JSON.stringify(cart));
+          localStorage.setItem(getStorageKey("appleStoreOrders"), JSON.stringify(orders));
+        } catch (_error) {
+        }
+      }
+
+      async function syncListToDatabase(key, list) {
+        const account = getCurrentAccount();
+        if (!account) {
+          return;
+        }
+
+        try {
+          if (key === getStorageKey("appleStoreCart")) {
+            await apiPut(`/api/user-store/${encodeURIComponent(account)}/cart`, { cart: list });
+            return;
+          }
+          if (key === getStorageKey("appleStoreOrders")) {
+            await apiPut(`/api/user-store/${encodeURIComponent(account)}/orders`, { orders: list });
+          }
+        } catch (_error) {
+        }
+      }
+
+      function updateCommentDraftHint() {
+        const tipEl = document.querySelector(".comment-compose .comment-login-tip");
+        if (!tipEl) {
+          return;
+        }
+        tipEl.innerText = getCurrentAccount()
+          ? "你正在以当前账号发表评论"
+          : "发表评论需要登录";
+      }
+
+      function keepCommentDraft() {
+        if (!currentProductId) {
+          return;
+        }
+        const input = document.getElementById("comment-input");
+        if (!input) {
+          return;
+        }
+        commentDraftMap[currentProductId] = input.value;
+      }
+
+      function restoreCommentDraft() {
+        const input = document.getElementById("comment-input");
+        if (!input) {
+          return;
+        }
+        input.value = commentDraftMap[currentProductId] || "";
+      }
+
+      async function loadComments() {
+        if (!currentProductId) {
+          return;
+        }
+
+        const listEl = document.getElementById("comment-list");
+        const countEl = document.getElementById("comment-count");
+        if (!listEl || !countEl) {
+          return;
+        }
+
+        listEl.innerHTML = '<p class="empty-tip">评论加载中...</p>';
+
+        const account = getCurrentAccount();
+        const queryParts = [
+          `page=${encodeURIComponent(commentListState.page)}`,
+          `pageSize=${encodeURIComponent(commentListState.pageSize)}`,
+          `sortBy=${encodeURIComponent(commentListState.sortBy)}`,
+        ];
+        if (account) {
+          queryParts.push(`account=${encodeURIComponent(account)}`);
+        }
+        const query = `?${queryParts.join("&")}`;
+
+        try {
+          const { ok, data } = await apiGet(`/api/products/${encodeURIComponent(currentProductId)}/comments${query}`);
+          if (!ok) {
+            listEl.innerHTML = `<p class="empty-tip">${escapeHtml(data.message || "评论加载失败")}</p>`;
+            commentListState.totalPages = 1;
+            updateCommentPaginationUi();
+            return;
+          }
+
+          const comments = Array.isArray(data.comments) ? data.comments : [];
+          commentListState.page = Number(data.page || commentListState.page || 1);
+          commentListState.totalPages = Number(data.totalPages || 1);
+          const fallbackCount = comments.reduce(
+            (sum, item) => sum + 1 + (Array.isArray(item.replies) ? item.replies.length : 0),
+            0,
+          );
+          const parsedTotalComments = Number(data.totalComments);
+          const countToShow = Number.isFinite(parsedTotalComments)
+            ? parsedTotalComments
+            : fallbackCount;
+          countEl.innerText = `${countToShow} 条`;
+          updateCommentPaginationUi();
+
+          if (!comments.length) {
+            listEl.innerHTML = '<p class="empty-tip">还没有评论，快来发表第一条吧。</p>';
+            return;
+          }
+
+          const sortedComments = sortCommentsForDisplay(comments, commentListState.sortBy);
+          listEl.innerHTML = sortedComments.map((item) => buildCommentHtml(item, false)).join("");
+        } catch (_error) {
+          listEl.innerHTML = '<p class="empty-tip">网络异常，评论暂时无法加载。</p>';
+          commentListState.totalPages = 1;
+          updateCommentPaginationUi();
+        }
+      }
+
+      function setCommentSort(sortBy) {
+        commentListState.sortBy = sortBy === "likes" ? "likes" : "time";
+        resetCommentPage();
+        loadComments();
+      }
+
+      function changeCommentPage(nextPage) {
+        const totalPages = Math.max(Number(commentListState.totalPages || 1), 1);
+        if (nextPage < 1 || nextPage > totalPages) {
+          return;
+        }
+        commentListState.page = nextPage;
+        loadComments();
+      }
+
+      function sortCommentsForDisplay(list, sortBy) {
+        if (!Array.isArray(list)) {
+          return [];
+        }
+
+        const getTimeValue = (item) => {
+          const time = new Date(item.createdAt || 0).getTime();
+          return Number.isNaN(time) ? 0 : time;
+        };
+
+        const sorted = [...list].sort((a, b) => {
+          if (sortBy === "likes") {
+            const likeDiff = Number(b.likeCount || 0) - Number(a.likeCount || 0);
+            if (likeDiff !== 0) {
+              return likeDiff;
+            }
+          }
+          return getTimeValue(b) - getTimeValue(a);
+        });
+
+        return sorted.map((item) => ({
+          ...item,
+          replies: sortCommentsForDisplay(item.replies || [], sortBy),
+        }));
+      }
+
+      function toggleReplyBox(commentId) {
+        const editor = document.getElementById(`reply-editor-${commentId}`);
+        if (!editor) {
+          return;
+        }
+        const show = editor.style.display === "none";
+        editor.style.display = show ? "block" : "none";
+        if (show) {
+          const input = document.getElementById(`reply-input-${commentId}`);
+          if (input) {
+            input.focus();
+          }
+        }
+      }
+
+      async function submitComment() {
+        if (!ensureLoggedIn()) {
+          return;
+        }
+        if (!currentProductId) {
+          return;
+        }
+
+        const input = document.getElementById("comment-input");
+        if (!input) {
+          return;
+        }
+
+        const content = input.value.trim();
+        if (!content) {
+          alert("评论内容不能为空");
+          return;
+        }
+
+        try {
+          const { ok, data } = await apiPost(`/api/products/${encodeURIComponent(currentProductId)}/comments`, {
+            account: getCurrentAccount(),
+            content,
+          });
+          if (!ok) {
+            alert(data.message || "评论发布失败");
+            return;
+          }
+          input.value = "";
+          commentDraftMap[currentProductId] = "";
+          resetCommentPage();
+          await loadComments();
+        } catch (_error) {
+          alert("网络异常，请稍后重试");
+        }
+      }
+
+      async function submitReply(commentId) {
+        if (!ensureLoggedIn()) {
+          return;
+        }
+        if (!currentProductId) {
+          return;
+        }
+
+        const input = document.getElementById(`reply-input-${commentId}`);
+        if (!input) {
+          return;
+        }
+
+        const content = input.value.trim();
+        if (!content) {
+          alert("回复内容不能为空");
+          return;
+        }
+
+        try {
+          const { ok, data } = await apiPost(`/api/products/${encodeURIComponent(currentProductId)}/comments`, {
+            account: getCurrentAccount(),
+            content,
+            parentId: commentId,
+          });
+          if (!ok) {
+            alert(data.message || "回复发布失败");
+            return;
+          }
+          await loadComments();
+        } catch (_error) {
+          alert("网络异常，请稍后重试");
+        }
+      }
+
+      async function toggleCommentLike(commentId) {
+        if (!ensureLoggedIn()) {
+          return;
+        }
+
+        try {
+          const { ok, data } = await apiPost(`/api/comments/${commentId}/like`, {
+            account: getCurrentAccount(),
+          });
+          if (!ok) {
+            alert(data.message || "点赞失败");
+            return;
+          }
+          await loadComments();
+        } catch (_error) {
+          alert("网络异常，请稍后重试");
+        }
+      }
+
+      async function deleteComment(commentId) {
+        if (!ensureLoggedIn()) {
+          return;
+        }
+
+        if (!confirm("确认删除这条评论/回复吗？删除后无法恢复。")) {
+          return;
+        }
+
+        try {
+          const { ok, data } = await apiDelete(`/api/comments/${commentId}`, {
+            account: getCurrentAccount(),
+          });
+          if (!ok) {
+            alert(data.message || "删除失败");
+            return;
+          }
+          await loadComments();
+        } catch (_error) {
+          alert("网络异常，请稍后重试");
+        }
+      }
 
       function getCurrentAccount() {
         return localStorage.getItem("appleStoreAccount") || "";
@@ -2500,18 +3123,17 @@
 
       function writeList(key, list) {
         localStorage.setItem(key, JSON.stringify(list));
+        syncListToDatabase(key, list);
       }
 
       function getCurrentSelectionText() {
-        const activeCaps = Array.from(
-          document.querySelectorAll("#purchase-page .storage-box.active .capacity"),
-        )
-          .map((item) => item.innerText.trim())
-          .filter(Boolean);
-        return activeCaps.join(" / ");
+        return getCurrentSelectionParts().join(" / ");
       }
 
       function getCurrentPurchasePrice() {
+        if (currentSku && Number.isFinite(Number(currentSku.price))) {
+          return Number(currentSku.price);
+        }
         const priceText = document.querySelector(".purchase-price")
           ? document.querySelector(".purchase-price").innerText
           : "";
@@ -2519,10 +3141,26 @@
         return Number(onlyDigits || 0);
       }
 
+      function getCurrentSelectionParts() {
+        const sectionIds = ["appearance-section", "spec-section", "connection-section"];
+        return sectionIds
+          .flatMap((id) => {
+            const section = document.getElementById(id);
+            if (!section || section.style.display === "none") {
+              return [];
+            }
+            return Array.from(section.querySelectorAll(".storage-box.active .capacity"))
+              .map((item) => item.innerText.trim())
+              .filter(Boolean);
+          })
+          .filter(Boolean);
+      }
+
       function buildCurrentItem() {
         const image = document.getElementById("large-product-image");
         return {
           id: Date.now(),
+          skuId: currentSku ? currentSku.id : null,
           productId: currentProductId,
           name: document.querySelector(".purchase-title").innerText,
           price: getCurrentPurchasePrice(),
@@ -2530,6 +3168,71 @@
           image: image ? image.src : "",
           createdAt: new Date().toLocaleString("zh-CN"),
         };
+      }
+
+      function findMatchingSku() {
+        const selection = getCurrentSelectionText();
+        if (!currentProductSkus.length) {
+          return null;
+        }
+        return (
+          currentProductSkus.find((sku) => sku.description === selection) ||
+          currentProductSkus.find((sku) => selection && sku.description.includes(selection)) ||
+          currentProductSkus[0]
+        );
+      }
+
+      function updateCurrentSkuState() {
+        currentSku = findMatchingSku();
+        const stockEl = document.getElementById("purchase-stock-status");
+        const addBtn = document.querySelector(".add-to-cart-btn");
+        const checkoutBtn = document.querySelector(".checkout-btn");
+
+        if (!stockEl) {
+          return;
+        }
+
+        if (!currentSku) {
+          stockEl.innerText = "库存信息暂不可用";
+          stockEl.className = "purchase-stock-status low";
+          if (addBtn) addBtn.disabled = true;
+          if (checkoutBtn) checkoutBtn.disabled = true;
+          return;
+        }
+
+        const stock = Number(currentSku.stock || 0);
+        document.querySelector(".purchase-price").innerText = `RMB ${currentSku.price}`;
+        stockEl.innerText = stock > 0 ? `库存 ${stock} 件` : "暂时无货";
+        stockEl.className = stock > 0 && stock < 5
+          ? "purchase-stock-status low"
+          : "purchase-stock-status";
+        if (addBtn) addBtn.disabled = stock <= 0;
+        if (checkoutBtn) checkoutBtn.disabled = stock <= 0;
+      }
+
+      async function loadCurrentProductSkus() {
+        currentProductSkus = [];
+        currentSku = null;
+        const stockEl = document.getElementById("purchase-stock-status");
+        if (stockEl) {
+          stockEl.innerText = "库存加载中";
+          stockEl.className = "purchase-stock-status";
+        }
+
+        if (!currentProductId) {
+          updateCurrentSkuState();
+          return;
+        }
+
+        try {
+          const { ok, data } = await apiGet(`/api/products/${encodeURIComponent(currentProductId)}/skus`);
+          if (ok && Array.isArray(data.skus)) {
+            currentProductSkus = data.skus;
+          }
+        } catch (_error) {
+          currentProductSkus = [];
+        }
+        updateCurrentSkuState();
       }
 
       function hideAllMainPages() {
@@ -2540,9 +3243,11 @@
           "watch-page",
           "iphone-page",
           "airpods-page",
+          "other-page",
           "purchase-page",
           "cart-page",
           "order-page",
+          "address-page",
           "password-page",
         ];
         pageIds.forEach((id) => {
@@ -2589,9 +3294,10 @@
                   <input class="cart-select" type="checkbox" value="${index}" onchange="updateCartCheckoutInfo()" />
                   选择
                 </label>
-                <p class="item-title">${item.name}</p>
-                <p class="item-meta">${item.selection || "默认配置"}</p>
-                <p class="item-meta">RMB ${item.price}</p>
+                <p class="item-title">${escapeHtml(item.name)}</p>
+                <p class="item-meta">${escapeHtml(item.selection || "默认配置")}</p>
+                <p class="item-meta">RMB ${item.price} × ${item.quantity || 1}</p>
+                <p class="item-meta">当前库存：${item.stock ?? "-"}</p>
                 <p class="item-meta">加入时间：${item.createdAt}</p>
               </div>
               <button class="buy-btn" onclick="removeCartItem(${index})">移除</button>
@@ -2641,10 +3347,14 @@
         const cartItems = readList(getStorageKey("appleStoreCart"));
         const selectedIndexes = getSelectedCartIndexes();
         const selectedItems = selectedIndexes.map((index) => cartItems[index]).filter(Boolean);
-        const totalPrice = selectedItems.reduce((sum, item) => sum + Number(item.price || 0), 0);
+        const totalPrice = selectedItems.reduce(
+          (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
+          0,
+        );
 
         if (summaryEl) {
-          summaryEl.innerText = `已选 ${selectedItems.length} 件，共 RMB ${totalPrice}`;
+          const quantity = selectedItems.reduce((sum, item) => sum + Number(item.quantity || 1), 0);
+          summaryEl.innerText = `已选 ${quantity} 件，共 RMB ${totalPrice}`;
         }
         if (checkoutBtn) {
           checkoutBtn.disabled = selectedItems.length === 0;
@@ -2655,22 +3365,31 @@
 
       function renderOrderPage() {
         const listEl = document.getElementById("order-list");
-        const orderItems = readList(getStorageKey("appleStoreOrders"));
+        const orders = readList(getStorageKey("appleStoreOrders"));
 
-        if (!orderItems.length) {
+        if (!orders.length) {
           listEl.innerHTML = '<p class="empty-tip">你还没有订单，完成一次购买后会显示在这里。</p>';
           return;
         }
 
-        listEl.innerHTML = orderItems
+        listEl.innerHTML = orders
           .map(
-            (item) => `
+            (order) => `
             <div class="account-item">
               <div>
-                <p class="item-title">${item.name}</p>
-                <p class="item-meta">${item.selection || "默认配置"}</p>
-                <p class="item-meta">RMB ${item.price}</p>
-                <p class="item-meta">支付时间：${item.createdAt}</p>
+                <p class="item-title">订单 ${escapeHtml(order.orderNo || String(order.id || ""))}</p>
+                <p class="item-meta">状态：${escapeHtml(order.status || "paid")}，合计 RMB ${order.totalAmount || 0}</p>
+                <p class="item-meta">支付时间：${formatDateTime(order.paidAt || order.createdAt)}</p>
+                ${order.address ? `<p class="item-meta">收货地址：${escapeHtml(order.address.receiverName)} ${escapeHtml(order.address.phone)} ${escapeHtml(order.address.province)}${escapeHtml(order.address.city)}${escapeHtml(order.address.district || "")}${escapeHtml(order.address.detail)}</p>` : ""}
+                <div class="order-item-list">
+                  ${(order.items || [])
+                    .map(
+                      (item) => `
+                        <p class="item-meta">${escapeHtml(item.name)} / ${escapeHtml(item.selection || "默认配置")} / RMB ${item.price} × ${item.quantity || 1}</p>
+                      `,
+                    )
+                    .join("")}
+                </div>
               </div>
             </div>
           `,
@@ -2678,19 +3397,21 @@
           .join("");
       }
 
-      function openCartPage() {
+      async function openCartPage() {
         if (!ensureLoggedIn()) {
           return;
         }
+        await loadUserStoreFromDatabase();
         hideAllMainPages();
         document.getElementById("cart-page").style.display = "block";
         renderCartPage();
       }
 
-      function openOrderPage() {
+      async function openOrderPage() {
         if (!ensureLoggedIn()) {
           return;
         }
+        await loadUserStoreFromDatabase();
         hideAllMainPages();
         document.getElementById("order-page").style.display = "block";
         renderOrderPage();
@@ -2704,22 +3425,357 @@
         document.getElementById("password-page").style.display = "block";
       }
 
-      function removeCartItem(index) {
-        const key = getStorageKey("appleStoreCart");
-        const cartItems = readList(key);
-        cartItems.splice(index, 1);
-        writeList(key, cartItems);
-        renderCartPage();
+      async function loadAddresses() {
+        const listEl = document.getElementById("address-list");
+        if (!listEl || !getCurrentAccount()) {
+          return [];
+        }
+
+        listEl.innerHTML = '<p class="empty-tip">地址加载中...</p>';
+        try {
+          const { ok, data } = await apiGet(`/api/addresses/${encodeURIComponent(getCurrentAccount())}`);
+          if (!ok) {
+            listEl.innerHTML = `<p class="empty-tip">${escapeHtml(data.message || "地址加载失败")}</p>`;
+            return [];
+          }
+
+          const addresses = Array.isArray(data.addresses) ? data.addresses : [];
+          addressCache = addresses;
+          if (!addresses.length) {
+            listEl.innerHTML = '<p class="empty-tip">还没有收货地址。下单时会自动使用默认地址。</p>';
+            return [];
+          }
+
+          listEl.innerHTML = addresses
+            .map(
+              (item) => `
+              <div class="account-item">
+                <div>
+                  <p class="item-title">${escapeHtml(item.receiverName)} ${item.isDefault ? "（默认）" : ""}</p>
+                  <p class="item-meta">${escapeHtml(item.phone)}</p>
+                  <p class="item-meta">${escapeHtml(item.province)}${escapeHtml(item.city)}${escapeHtml(item.district || "")}${escapeHtml(item.detail)}</p>
+                </div>
+                <div class="address-row-actions">
+                  <button class="account-back-btn" type="button" onclick="editAddressById(${item.id})">编辑</button>
+                  <button class="buy-btn" type="button" onclick="deleteAddress(${item.id})">删除</button>
+                </div>
+              </div>
+            `,
+            )
+            .join("");
+          return addresses;
+        } catch (_error) {
+          listEl.innerHTML = '<p class="empty-tip">网络异常，地址暂时无法加载。</p>';
+          return [];
+        }
       }
 
-      function checkoutSelectedFromCart() {
+      async function openAddressPage() {
+        if (!ensureLoggedIn()) {
+          return;
+        }
+        hideAllMainPages();
+        document.getElementById("address-page").style.display = "block";
+        await loadAddresses();
+      }
+
+      function resetAddressForm() {
+        const form = document.getElementById("address-form");
+        if (form) {
+          form.reset();
+        }
+        const idInput = document.getElementById("address-id");
+        if (idInput) {
+          idInput.value = "";
+        }
+      }
+
+      function editAddressById(addressId) {
+        const address = addressCache.find((item) => Number(item.id) === Number(addressId));
+        if (address) {
+          editAddress(address);
+        }
+      }
+
+      function editAddress(address) {
+        document.getElementById("address-id").value = address.id || "";
+        document.getElementById("address-receiver").value = address.receiverName || "";
+        document.getElementById("address-phone").value = address.phone || "";
+        document.getElementById("address-province").value = address.province || "";
+        document.getElementById("address-city").value = address.city || "";
+        document.getElementById("address-district").value = address.district || "";
+        document.getElementById("address-detail").value = address.detail || "";
+        document.getElementById("address-default").checked = !!address.isDefault;
+        document.getElementById("address-receiver").focus();
+      }
+
+      async function deleteAddress(addressId) {
+        if (!confirm("确认删除这个收货地址？")) {
+          return;
+        }
+        try {
+          const { ok, data } = await apiDelete(`/api/addresses/${addressId}`, {
+            account: getCurrentAccount(),
+          });
+          if (!ok) {
+            alert(data.message || "删除失败");
+            return;
+          }
+          resetAddressForm();
+          await loadAddresses();
+        } catch (_error) {
+          alert("网络异常，请稍后重试");
+        }
+      }
+
+      async function submitAddressForm(event) {
+        event.preventDefault();
+        const addressId = document.getElementById("address-id").value;
+        const payload = {
+          account: getCurrentAccount(),
+          receiverName: document.getElementById("address-receiver").value,
+          phone: document.getElementById("address-phone").value,
+          province: document.getElementById("address-province").value,
+          city: document.getElementById("address-city").value,
+          district: document.getElementById("address-district").value,
+          detail: document.getElementById("address-detail").value,
+          isDefault: document.getElementById("address-default").checked,
+        };
+
+        try {
+          const result = addressId
+            ? await apiPut(`/api/addresses/${addressId}`, payload)
+            : await apiPost("/api/addresses", payload);
+          if (!result.ok) {
+            alert(result.data.message || "保存失败");
+            return;
+          }
+          resetAddressForm();
+          await loadAddresses();
+        } catch (_error) {
+          alert("网络异常，请稍后重试");
+        }
+      }
+
+      function getCheckoutAddressPayloadFromForm(isDefault) {
+        return {
+          account: getCurrentAccount(),
+          receiverName: document.getElementById("checkout-address-receiver").value.trim(),
+          phone: document.getElementById("checkout-address-phone").value.trim(),
+          province: document.getElementById("checkout-address-province").value.trim(),
+          city: document.getElementById("checkout-address-city").value.trim(),
+          district: document.getElementById("checkout-address-district").value.trim(),
+          detail: document.getElementById("checkout-address-detail").value.trim(),
+          isDefault,
+        };
+      }
+
+      function formatCheckoutAddress(address) {
+        return `${address.receiverName} ${address.phone}\n${address.province}${address.city}${address.district || ""}${address.detail}`;
+      }
+
+      function findSavedCheckoutAddress(beforeIds, payload, addresses) {
+        const newlyCreated = addresses.find((item) => !beforeIds.has(Number(item.id)));
+        if (newlyCreated) {
+          return newlyCreated;
+        }
+        return addresses.find(
+          (item) =>
+            item.receiverName === payload.receiverName &&
+            item.phone === payload.phone &&
+            item.province === payload.province &&
+            item.city === payload.city &&
+            (item.district || "") === (payload.district || "") &&
+            item.detail === payload.detail,
+        );
+      }
+
+      function promptCheckoutAddress(defaultAddress) {
+        const modal = document.getElementById("checkout-address-modal");
+        const form = document.getElementById("checkout-address-form");
+        const cancelBtn = document.getElementById("checkout-address-cancel");
+        const title = document.getElementById("checkout-address-title");
+        const tip = document.getElementById("checkout-address-tip");
+        const defaultPanel = document.getElementById("checkout-default-panel");
+        const defaultText = document.getElementById("checkout-default-address");
+        const useDefaultBtn = document.getElementById("checkout-use-default");
+        const inputNewBtn = document.getElementById("checkout-input-new");
+        if (!modal || !form || !cancelBtn || !title || !tip || !defaultPanel || !defaultText || !useDefaultBtn || !inputNewBtn) {
+          return Promise.resolve(null);
+        }
+
+        const cleanup = () => {
+          form.onsubmit = null;
+          cancelBtn.onclick = null;
+          useDefaultBtn.onclick = null;
+          inputNewBtn.onclick = null;
+          modal.style.display = "none";
+        };
+
+        const showAddressForm = (saveAsDefault) => {
+          title.textContent = "填写收货地址";
+          tip.textContent = defaultAddress
+            ? "请输入本次结账使用的新地址。"
+            : "当前账号没有默认地址，请先填写地址后继续结账。";
+          defaultPanel.style.display = "none";
+          form.style.display = "grid";
+          form.dataset.saveDefault = saveAsDefault ? "1" : "0";
+          document.getElementById("checkout-address-receiver").focus();
+        };
+
+        form.reset();
+        form.style.display = "none";
+        defaultPanel.style.display = "none";
+        modal.style.display = "flex";
+
+        return new Promise((resolve) => {
+          if (defaultAddress) {
+            title.textContent = "是否使用默认地址？";
+            tip.textContent = "请选择本次结账使用的收货地址。";
+            defaultText.textContent = formatCheckoutAddress(defaultAddress);
+            defaultPanel.style.display = "block";
+          } else {
+            showAddressForm(true);
+          }
+
+          useDefaultBtn.onclick = () => {
+            cleanup();
+            resolve({ type: "default", addressId: defaultAddress.id });
+          };
+          inputNewBtn.onclick = () => {
+            form.reset();
+            showAddressForm(false);
+          };
+          form.onsubmit = (event) => {
+            event.preventDefault();
+            const payload = getCheckoutAddressPayloadFromForm(form.dataset.saveDefault === "1");
+            if (!payload.receiverName || !payload.phone || !payload.province || !payload.city || !payload.detail) {
+              alert("请填写完整的收货地址。");
+              return;
+            }
+            cleanup();
+            resolve({ type: "new", payload });
+          };
+          cancelBtn.onclick = () => {
+            cleanup();
+            resolve(null);
+          };
+        });
+      }
+
+      async function fetchCheckoutAddresses() {
+        const { ok, data } = await apiGet(`/api/addresses/${encodeURIComponent(getCurrentAccount())}`);
+        if (!ok) {
+          alert(data.message || "地址加载失败");
+          return [];
+        }
+        const addresses = Array.isArray(data.addresses) ? data.addresses : [];
+        addressCache = addresses;
+        return addresses;
+      }
+
+      async function ensureCheckoutAddressId() {
+        let addresses = await fetchCheckoutAddresses();
+        const defaultAddress = addresses.find((item) => item.isDefault);
+        const beforeIds = new Set(addresses.map((item) => Number(item.id)));
+
+        const choice = await promptCheckoutAddress(defaultAddress);
+        if (!choice) {
+          return null;
+        }
+        if (choice.type === "default") {
+          return choice.addressId;
+        }
+
+        const saveResult = await apiPost("/api/addresses", choice.payload);
+        if (!saveResult.ok) {
+          alert(saveResult.data.message || "保存收货地址失败");
+          return null;
+        }
+
+        addresses = await fetchCheckoutAddresses();
+        const savedAddress = findSavedCheckoutAddress(beforeIds, choice.payload, addresses);
+        return savedAddress ? savedAddress.id : null;
+      }
+
+      async function runProductSearch() {
+        const resultsEl = document.getElementById("product-search-results");
+        if (!resultsEl) {
+          return;
+        }
+        const q = document.getElementById("product-search-input").value.trim();
+        const category = document.getElementById("product-search-category").value;
+        const sort = document.getElementById("product-search-sort").value;
+        const params = new URLSearchParams({ q, category, sort });
+        const account = getCurrentAccount();
+        if (account) {
+          params.set("account", account);
+        }
+
+        resultsEl.innerHTML = '<p class="empty-tip">正在搜索...</p>';
+        try {
+          const { ok, data } = await apiGet(`/api/products/search?${params.toString()}`);
+          if (!ok) {
+            resultsEl.innerHTML = `<p class="empty-tip">${escapeHtml(data.message || "搜索失败")}</p>`;
+            return;
+          }
+          const products = Array.isArray(data.products) ? data.products : [];
+          if (!products.length) {
+            resultsEl.innerHTML = '<p class="empty-tip">没有找到符合条件的商品。</p>';
+            return;
+          }
+          resultsEl.innerHTML = products
+            .map(
+              (item) => `
+              <article class="search-result-card">
+                ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" />` : ""}
+                <div>
+                  <p class="item-title">${escapeHtml(item.name)}</p>
+                  <p class="item-meta">${escapeHtml(item.description || item.category)}</p>
+                  <p class="item-meta">RMB ${item.price} 起 · 库存 ${item.stock} · 销量 ${item.sales}</p>
+                </div>
+                <button type="button" class="buy-btn" onclick="buyProduct('${escapeHtml(item.productId)}')">购买</button>
+              </article>
+            `,
+            )
+            .join("");
+        } catch (_error) {
+          resultsEl.innerHTML = '<p class="empty-tip">网络异常，搜索暂时不可用。</p>';
+        }
+      }
+
+      async function removeCartItem(index) {
+        const key = getStorageKey("appleStoreCart");
+        const cartItems = readList(key);
+        const item = cartItems[index];
+        if (!item || !item.cartItemId) {
+          cartItems.splice(index, 1);
+          localStorage.setItem(key, JSON.stringify(cartItems));
+          renderCartPage();
+          return;
+        }
+
+        try {
+          const { ok, data } = await apiDelete(`/api/cart/items/${item.cartItemId}`, {
+            account: getCurrentAccount(),
+          });
+          if (!ok) {
+            alert(data.message || "移除失败");
+            return;
+          }
+          await loadUserStoreFromDatabase();
+          renderCartPage();
+        } catch (_error) {
+          alert("网络异常，请稍后重试");
+        }
+      }
+
+      async function checkoutSelectedFromCart() {
         if (!ensureLoggedIn()) {
           return;
         }
 
-        const cartKey = getStorageKey("appleStoreCart");
-        const orderKey = getStorageKey("appleStoreOrders");
-        const cartItems = readList(cartKey);
+        const cartItems = readList(getStorageKey("appleStoreCart"));
         const selectedIndexes = getSelectedCartIndexes().sort((a, b) => a - b);
 
         if (!selectedIndexes.length) {
@@ -2727,56 +3783,119 @@
           return;
         }
 
-        const checkoutItems = selectedIndexes
+        const cartItemIds = selectedIndexes
           .map((index) => cartItems[index])
           .filter(Boolean)
-          .map((item) => ({
-            ...item,
-            createdAt: new Date().toLocaleString("zh-CN"),
-          }));
+          .map((item) => item.cartItemId)
+          .filter(Boolean);
 
-        const remainItems = cartItems.filter((_, index) => !selectedIndexes.includes(index));
-        const orderItems = readList(orderKey);
-
-        writeList(orderKey, orderItems.concat(checkoutItems));
-        writeList(cartKey, remainItems);
-
-        alert("所选商品结算成功，已移入订单页面。");
-        openOrderPage();
+        try {
+          const addressId = await ensureCheckoutAddressId();
+          if (!addressId) {
+            return;
+          }
+          const { ok, data } = await apiPost("/api/orders/checkout", {
+            account: getCurrentAccount(),
+            cartItemIds,
+            addressId,
+          });
+          if (!ok) {
+            alert(data.message || "结算失败");
+            return;
+          }
+          if (Array.isArray(data.cart)) {
+            localStorage.setItem(getStorageKey("appleStoreCart"), JSON.stringify(data.cart));
+          }
+          if (Array.isArray(data.orders)) {
+            localStorage.setItem(getStorageKey("appleStoreOrders"), JSON.stringify(data.orders));
+          }
+          alert(data.message || "支付成功，订单已生成。");
+          openOrderPage();
+        } catch (_error) {
+          alert("网络异常，请稍后重试");
+        }
       }
 
-      function addCurrentProductToCart() {
+      async function addCurrentProductToCart() {
         if (!ensureLoggedIn()) {
           return;
         }
         if (!currentProductId) {
           return;
         }
-        const key = getStorageKey("appleStoreCart");
-        const cartItems = readList(key);
-        cartItems.push(buildCurrentItem());
-        writeList(key, cartItems);
-        alert("已加入购物车，可在头像菜单的“购物车”中查看。");
+        updateCurrentSkuState();
+        const item = buildCurrentItem();
+        if (!item.skuId) {
+          alert("库存信息暂不可用，请稍后重试。");
+          return;
+        }
+
+        try {
+          const { ok, data } = await apiPost("/api/cart/items", {
+            account: getCurrentAccount(),
+            skuId: item.skuId,
+            quantity: 1,
+          });
+          if (!ok) {
+            alert(data.message || "加入购物车失败");
+            return;
+          }
+          if (Array.isArray(data.cart)) {
+            localStorage.setItem(getStorageKey("appleStoreCart"), JSON.stringify(data.cart));
+          }
+          alert("已加入购物车，可在头像菜单的“购物车”中查看。");
+          updateCurrentSkuState();
+        } catch (_error) {
+          alert("网络异常，请稍后重试");
+        }
       }
 
-      function checkoutCurrentProduct() {
+      async function checkoutCurrentProduct() {
         if (!ensureLoggedIn()) {
           return;
         }
         if (!currentProductId) {
           return;
         }
-        const orderKey = getStorageKey("appleStoreOrders");
-        const orderItems = readList(orderKey);
-        orderItems.push(buildCurrentItem());
-        writeList(orderKey, orderItems);
-        alert("支付成功！你可以在“查看订单”中查看订单记录。");
-        openOrderPage();
+        updateCurrentSkuState();
+        const item = buildCurrentItem();
+        if (!item.skuId) {
+          alert("库存信息暂不可用，请稍后重试。");
+          return;
+        }
+
+        try {
+          const addressId = await ensureCheckoutAddressId();
+          if (!addressId) {
+            return;
+          }
+          const { ok, data } = await apiPost("/api/orders/checkout", {
+            account: getCurrentAccount(),
+            items: [{ skuId: item.skuId, quantity: 1 }],
+            addressId,
+          });
+          if (!ok) {
+            alert(data.message || "结算失败");
+            return;
+          }
+          if (Array.isArray(data.cart)) {
+            localStorage.setItem(getStorageKey("appleStoreCart"), JSON.stringify(data.cart));
+          }
+          if (Array.isArray(data.orders)) {
+            localStorage.setItem(getStorageKey("appleStoreOrders"), JSON.stringify(data.orders));
+          }
+          alert("支付成功！你可以在“查看订单”中查看订单记录。");
+          openOrderPage();
+        } catch (_error) {
+          alert("网络异常，请稍后重试");
+        }
       }
 
       function logoutUser() {
         localStorage.removeItem("appleStoreAccount");
+        localStorage.removeItem("appleStoreIsAdmin");
         initAuthNav();
+        updateCommentDraftHint();
         alert("已退出登录");
         window.location.href = "login.html";
       }
@@ -2790,18 +3909,15 @@
         document.querySelector(".purchase-price").innerText =
           "RMB " + maxPrice + " 起";
       }
-
-      // --- 功能：从选购页跳转到购买详情页，并自动填充对应的数据 ---
       function buyProduct(productId) {
-        // 1. 调出对应产品的资料库
         const data = productData[productId];
         if (!data) {
           return;
         }
         currentCategory = data.category;
         currentProductId = productId;
-
-        // 2. 替换页面上的文字和主图
+        currentProductSkus = [];
+        currentSku = null;
         document.querySelector(".purchase-title").innerText = data.name;
         document.querySelector(".purchase-price").innerText =
           "RMB " + data.price + " 起";
@@ -2846,8 +3962,6 @@
           connectionSection.style.display = "none";
           connectionContainer.innerHTML = "";
         }
-
-        // 返回按钮按当前分类显示
         const backButton = document.querySelector(".back-btn");
         if (currentCategory === "ipad") {
           backButton.innerText = "< 返回 iPad 选购";
@@ -2860,15 +3974,12 @@
         } else {
           backButton.innerText = "< 返回 Mac 选购";
         }
-
-        // 3. 动态生成方形的颜色选项框
         const colorContainer = document.getElementById("dynamic-color-options");
-        colorContainer.innerHTML = ""; // 清空上一次的选项
+        colorContainer.innerHTML = ""; 
 
         const appearanceOptions =
           data.storageMode === "watch-material" ? data.materials : data.colors;
         appearanceOptions.forEach((color, index) => {
-          // 默认选中第一个颜色
           const activeClass = index === 0 ? "active" : "";
           let boxHTML = "";
           if (data.storageMode === "watch-material") {
@@ -2887,22 +3998,18 @@
             </div>
         `;
           } else {
-            // 借用 storage-box 的样式来做颜色选择框
             boxHTML = `
             <div class="storage-box ${activeClass}" onclick="selectPurchaseColor(this, '${color.file}')">
                 <span class="capacity">${color.name}</span>
             </div>
         `;
           }
-          // 把这段 HTML 塞进页面里
           colorContainer.innerHTML += boxHTML;
         });
-
-        // 4. 动态生成存储容量选项
         const storageContainer = document.getElementById(
           "dynamic-spec-options",
         );
-        storageContainer.innerHTML = ""; // 清空上一次的选项
+        storageContainer.innerHTML = ""; 
 
         const specOptions =
           data.storageMode === "watch-material"
@@ -2912,7 +4019,6 @@
               : data.storages;
 
         specOptions.forEach((storage, index) => {
-          // 默认选中第一个存储
           const activeClass = index === 0 ? "active" : "";
           let priceHTML = "";
           if (data.storageMode === "absolute") {
@@ -2937,7 +4043,6 @@
                 ${priceHTML}
             </div>
         `;
-          // 把这段 HTML 塞进页面里
           storageContainer.innerHTML += boxHTML;
         });
 
@@ -2970,36 +4075,33 @@
           document.getElementById("large-product-image").src =
             `../images/${data.models[0].file}`;
         }
-
-        // 5. iPad 选容量时显示对应总价
         if (data.storageMode === "absolute" && data.storages.length > 0) {
           document.querySelector(".purchase-price").innerText =
             "RMB " + data.storages[0].price;
         }
-
-        // 6. 切换页面显示
         document.getElementById("mac-page").style.display = "none";
         document.getElementById("iPad-page").style.display = "none";
         document.getElementById("watch-page").style.display = "none";
         document.getElementById("iphone-page").style.display = "none";
         document.getElementById("airpods-page").style.display = "none";
         document.getElementById("purchase-page").style.display = "block";
-        window.scrollTo(0, 0); // 滚回顶部
+        restoreCommentDraft();
+        resetCommentPage();
+        loadCurrentProductSkus();
+        loadComments();
+        updateCommentDraftHint();
+        window.scrollTo(0, 0); 
       }
-
-      // --- 功能：在购买详情页，点击方框切换产品图 ---
       function selectPurchaseColor(clickedBox, fileName) {
-        // 换大图
         document.getElementById("large-product-image").src =
           `../images/${fileName}`;
-
-        // 改变被点击方框的蓝底框状态
         const boxes =
           clickedBox.parentElement.getElementsByClassName("storage-box");
         for (let i = 0; i < boxes.length; i++) {
           boxes[i].classList.remove("active");
         }
         clickedBox.classList.add("active");
+        updateCurrentSkuState();
       }
 
       function selectWatchOption(clickedBox, price, group, fileName = "") {
@@ -3024,9 +4126,8 @@
         }
 
         updateWatchTopPriceByMax();
+        updateCurrentSkuState();
       }
-
-      // --- 从购买页返回对应列表页 ---
       function goBackToMac() {
         document.getElementById("purchase-page").style.display = "none";
         document.getElementById("mac-page").style.display =
@@ -3040,8 +4141,6 @@
         document.getElementById("airpods-page").style.display =
           currentCategory === "airpods" ? "block" : "none";
       }
-
-      // --- 点击存储容量：切换选中，并按模式刷新价格 ---
       function selectStorage(
         clickedBox,
         storagePrice = 0,
@@ -3070,6 +4169,7 @@
           document.querySelector(".purchase-price").innerText =
             "RMB " + storagePrice + " 起";
         }
+        updateCurrentSkuState();
       }
 
       function showWatchTip() {
@@ -3079,21 +4179,33 @@
       function showAirPodsTip() {
         alert("AirPods 购买详情页即将上线，敬请期待。");
       }
-
-      // 1. 确保在页面加载完后执行
-      // 1. 确保在页面加载完后执行
-      window.onload = function () {
+      window.onload = async function () {
         initAuthNav();
+        await ensureProductCatalogInDatabase();
+        await loadUserStoreFromDatabase();
 
         const addToCartBtn = document.querySelector(".add-to-cart-btn");
         const checkoutBtn = document.querySelector(".checkout-btn");
         const menuCart = document.getElementById("menu-cart");
         const menuOrders = document.getElementById("menu-orders");
+        const menuAddresses = document.getElementById("menu-addresses");
+        const menuAdmin = document.getElementById("menu-admin");
         const menuPassword = document.getElementById("menu-password");
         const menuLogout = document.getElementById("menu-logout");
         const cartSelectAll = document.getElementById("cart-select-all");
         const cartCheckoutSelectedBtn = document.getElementById("cart-checkout-selected-btn");
         const passwordForm = document.getElementById("password-form");
+        const addressForm = document.getElementById("address-form");
+        const addressResetBtn = document.getElementById("address-reset-btn");
+        const productSearchBtn = document.getElementById("product-search-btn");
+        const productSearchInput = document.getElementById("product-search-input");
+        const productSearchCategory = document.getElementById("product-search-category");
+        const productSearchSort = document.getElementById("product-search-sort");
+        const commentSubmitBtn = document.getElementById("comment-submit-btn");
+        const commentInput = document.getElementById("comment-input");
+        const commentSortSelect = document.getElementById("comment-sort-select");
+        const commentPrevBtn = document.getElementById("comment-prev-btn");
+        const commentNextBtn = document.getElementById("comment-next-btn");
 
         if (addToCartBtn) {
           addToCartBtn.addEventListener("click", addCurrentProductToCart);
@@ -3106,6 +4218,14 @@
         }
         if (menuOrders) {
           menuOrders.addEventListener("click", openOrderPage);
+        }
+        if (menuAddresses) {
+          menuAddresses.addEventListener("click", openAddressPage);
+        }
+        if (menuAdmin) {
+          menuAdmin.addEventListener("click", () => {
+            window.location.href = "admin.html";
+          });
         }
         if (menuPassword) {
           menuPassword.addEventListener("click", openPasswordPage);
@@ -3136,7 +4256,7 @@
             }
 
             try {
-              const response = await fetch("http://127.0.0.1:3100/api/change-password", {
+              const response = await fetch(`${API_BASE}/api/change-password`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -3164,6 +4284,7 @@
               tip.textContent = (data.message || "密码修改成功") + "，即将退出登录";
               tip.className = "form-tip success";
               localStorage.removeItem("appleStoreAccount");
+              localStorage.removeItem("appleStoreIsAdmin");
               initAuthNav();
               setTimeout(() => {
                 window.location.href = "login.html";
@@ -3174,62 +4295,102 @@
             }
           });
         }
-
-        // 获取导航栏按钮 (注意严格对应 HTML 里的 id)
+        if (addressForm) {
+          addressForm.addEventListener("submit", submitAddressForm);
+        }
+        if (addressResetBtn) {
+          addressResetBtn.addEventListener("click", resetAddressForm);
+        }
+        if (productSearchBtn) {
+          productSearchBtn.addEventListener("click", runProductSearch);
+        }
+        if (productSearchInput) {
+          productSearchInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              runProductSearch();
+            }
+          });
+        }
+        [productSearchCategory, productSearchSort].forEach((el) => {
+          if (el) {
+            el.addEventListener("change", runProductSearch);
+          }
+        });
+        if (commentSubmitBtn) {
+          commentSubmitBtn.addEventListener("click", submitComment);
+        }
+        if (commentInput) {
+          commentInput.addEventListener("input", keepCommentDraft);
+        }
+        if (commentSortSelect) {
+          commentSortSelect.value = commentListState.sortBy;
+          commentSortSelect.addEventListener("change", (event) => {
+            setCommentSort(event.target.value);
+          });
+        }
+        if (commentPrevBtn) {
+          commentPrevBtn.addEventListener("click", () => {
+            changeCommentPage(commentListState.page - 1);
+          });
+        }
+        if (commentNextBtn) {
+          commentNextBtn.addEventListener("click", () => {
+            changeCommentPage(commentListState.page + 1);
+          });
+        }
+        updateCommentPaginationUi();
+        updateCommentDraftHint();
         const btnMac = document.getElementById("nav-mac");
-        const btniPad = document.getElementById("nav-ipad"); // 修复：全小写
+        const btniPad = document.getElementById("nav-ipad"); 
         const btniPhone = document.getElementById("nav-iphone");
         const btnWatch = document.getElementById("nav-Watch");
         const btnAirPods = document.getElementById("nav-AirPods");
         const btnLogo = document.getElementById("nav-logo");
-
-        // 获取所有页面容器
         const home = document.getElementById("home-page");
         const mac = document.getElementById("mac-page");
-        const ipad = document.getElementById("iPad-page"); // 修复：获取了 iPad 页面 (你的 HTML 里是 iPad-page)
+        const ipad = document.getElementById("iPad-page"); 
         const watch = document.getElementById("watch-page");
         const iphone = document.getElementById("iphone-page");
         const airpods = document.getElementById("airpods-page");
-        const purchase = document.getElementById("purchase-page"); // 获取购买页，方便切换时隐藏
-
-        // 点击 Mac 导航
+        const other = document.getElementById("other-page");
+        const purchase = document.getElementById("purchase-page"); 
         if (btnMac) {
           btnMac.onclick = function () {
             document.getElementById("cart-page").style.display = "none";
             document.getElementById("order-page").style.display = "none";
             document.getElementById("password-page").style.display = "none";
+            document.getElementById("address-page").style.display = "none";
             home.style.display = "none";
-            ipad.style.display = "none"; // 隐藏 iPad 页
+            ipad.style.display = "none"; 
             watch.style.display = "none";
             iphone.style.display = "none";
             airpods.style.display = "none";
-            purchase.style.display = "none"; // 隐藏购买页
-            mac.style.display = "block"; // 显示 Mac 页
+            purchase.style.display = "none"; 
+            mac.style.display = "block"; 
           };
         }
-
-        // 点击 iPad 导航
         if (btniPad) {
           btniPad.onclick = function () {
             document.getElementById("cart-page").style.display = "none";
             document.getElementById("order-page").style.display = "none";
             document.getElementById("password-page").style.display = "none";
+            document.getElementById("address-page").style.display = "none";
             home.style.display = "none";
-            mac.style.display = "none"; // 隐藏 Mac 页
+            mac.style.display = "none"; 
             watch.style.display = "none";
             iphone.style.display = "none";
             airpods.style.display = "none";
-            purchase.style.display = "none"; // 隐藏购买页
-            ipad.style.display = "block"; // 显示 iPad 页
+            purchase.style.display = "none"; 
+            ipad.style.display = "block"; 
           };
         }
-
-        // 点击 Watch 导航
         if (btnWatch) {
           btnWatch.onclick = function () {
             document.getElementById("cart-page").style.display = "none";
             document.getElementById("order-page").style.display = "none";
             document.getElementById("password-page").style.display = "none";
+            document.getElementById("address-page").style.display = "none";
             home.style.display = "none";
             mac.style.display = "none";
             ipad.style.display = "none";
@@ -3239,13 +4400,12 @@
             watch.style.display = "block";
           };
         }
-
-        // 点击 AirPods 导航
         if (btnAirPods) {
           btnAirPods.onclick = function () {
             document.getElementById("cart-page").style.display = "none";
             document.getElementById("order-page").style.display = "none";
             document.getElementById("password-page").style.display = "none";
+            document.getElementById("address-page").style.display = "none";
             home.style.display = "none";
             mac.style.display = "none";
             ipad.style.display = "none";
@@ -3255,13 +4415,12 @@
             airpods.style.display = "block";
           };
         }
-
-        // 点击 iPhone 导航
         if (btniPhone) {
           btniPhone.onclick = function () {
             document.getElementById("cart-page").style.display = "none";
             document.getElementById("order-page").style.display = "none";
             document.getElementById("password-page").style.display = "none";
+            document.getElementById("address-page").style.display = "none";
             home.style.display = "none";
             mac.style.display = "none";
             ipad.style.display = "none";
@@ -3271,18 +4430,20 @@
             iphone.style.display = "block";
           };
         }
-
-        // 点击 Logo 回首页
         if (btnLogo) {
           btnLogo.onclick = function () {
             document.getElementById("cart-page").style.display = "none";
             document.getElementById("order-page").style.display = "none";
             document.getElementById("password-page").style.display = "none";
+            document.getElementById("address-page").style.display = "none";
             mac.style.display = "none";
             ipad.style.display = "none";
             watch.style.display = "none";
             iphone.style.display = "none";
             airpods.style.display = "none";
+            if (other) {
+              other.style.display = "none";
+            }
             purchase.style.display = "none";
             home.style.display = "block";
           };
@@ -3300,6 +4461,8 @@
         } else if (tab === "airpods" && btnAirPods) {
           btnAirPods.onclick();
         }
+
+        runProductSearch();
       };
 
       function initAuthNav() {
@@ -3307,6 +4470,7 @@
         const navRegister = document.getElementById("nav-register");
         const navUser = document.getElementById("nav-user");
         const userLink = navUser ? navUser.querySelector("a") : null;
+        const menuAdminItem = document.getElementById("menu-admin-item");
         const account = localStorage.getItem("appleStoreAccount");
 
         if (!navLogin || !navRegister || !navUser) {
@@ -3317,16 +4481,34 @@
           navLogin.classList.add("auth-hidden");
           navRegister.classList.add("auth-hidden");
           navUser.classList.remove("auth-hidden");
+          if (menuAdminItem) {
+            menuAdminItem.classList.add("auth-hidden");
+            fetch(`${API_BASE}/api/admin/me?account=${encodeURIComponent(account)}`)
+              .then((response) => {
+                if (response.ok) {
+                  menuAdminItem.classList.remove("auth-hidden");
+                }
+              })
+              .catch(() => {});
+          }
           if (userLink) {
             userLink.title = `已登录：${account}`;
           }
+          updateCommentDraftHint();
           return;
         }
 
         navLogin.classList.remove("auth-hidden");
         navRegister.classList.remove("auth-hidden");
         navUser.classList.add("auth-hidden");
+        if (menuAdminItem) {
+          menuAdminItem.classList.add("auth-hidden");
+        }
+        updateCommentDraftHint();
       }
     </script>
   </body>
 </html>
+
+
+
