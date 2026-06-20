@@ -44,6 +44,7 @@
           <h1>后台管理</h1>
         </div>
         <div class="admin-actions">
+          <a href="admin-users.html" class="account-back-btn">用户总览</a>
           <button id="admin-refresh-btn" class="buy-btn" type="button">刷新</button>
           <button id="admin-logout-btn" class="account-back-btn" type="button">退出</button>
         </div>
@@ -86,15 +87,6 @@
 
       function getCurrentAccount() {
         return localStorage.getItem("appleStoreAccount") || "";
-      }
-
-      function escapeHtml(value) {
-        return String(value || "")
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/\"/g, "&quot;")
-          .replace(/'/g, "&#39;");
       }
 
       function setTip(message, type = "") {

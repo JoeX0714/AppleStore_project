@@ -850,21 +850,6 @@ function sanitizeCommentText(value) {
   return text;
 }
 
-function parseArrayJson(value) {
-  if (Array.isArray(value)) {
-    return value;
-  }
-  if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (_error) {
-      return [];
-    }
-  }
-  return [];
-}
-
 function parseJsonObject(value) {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     return value;
@@ -2345,28 +2330,46 @@ app.get('/api/admin/users', (req, res) => {
     }
 
     const keyword = String(req.query.q || '').trim();
+    const field = String(req.query.field || '').trim().toLowerCase();
     const normalizedKeyword = normalizeSearchKeyword(keyword);
     const params = [];
     const where = [];
     if (keyword) {
-      where.push(`(
-        COALESCE(u.account, '') LIKE ?
-        OR COALESCE(u.email, '') LIKE ?
-        OR COALESCE(u.phone, '') LIKE ?
-        OR COALESCE(u.username, '') LIKE ?
-        OR LOWER(REPLACE(COALESCE(u.account, ''), ' ', '')) LIKE ?
-        OR LOWER(REPLACE(COALESCE(u.email, ''), ' ', '')) LIKE ?
-        OR LOWER(REPLACE(COALESCE(u.username, ''), ' ', '')) LIKE ?
-      )`);
-      params.push(
-        `%${keyword}%`,
-        `%${keyword}%`,
-        `%${keyword}%`,
-        `%${keyword}%`,
-        `%${normalizedKeyword}%`,
-        `%${normalizedKeyword}%`,
-        `%${normalizedKeyword}%`,
-      );
+      if (field === 'email') {
+        where.push(`(
+          COALESCE(u.email, '') LIKE ?
+          OR LOWER(REPLACE(COALESCE(u.email, ''), ' ', '')) LIKE ?
+        )`);
+        params.push(`%${keyword}%`, `%${normalizedKeyword}%`);
+      } else if (field === 'phone') {
+        where.push(`COALESCE(u.phone, '') LIKE ?`);
+        params.push(`%${keyword}%`);
+      } else if (field === 'account') {
+        where.push(`(
+          COALESCE(u.account, '') LIKE ?
+          OR LOWER(REPLACE(COALESCE(u.account, ''), ' ', '')) LIKE ?
+        )`);
+        params.push(`%${keyword}%`, `%${normalizedKeyword}%`);
+      } else {
+        where.push(`(
+          COALESCE(u.account, '') LIKE ?
+          OR COALESCE(u.email, '') LIKE ?
+          OR COALESCE(u.phone, '') LIKE ?
+          OR COALESCE(u.username, '') LIKE ?
+          OR LOWER(REPLACE(COALESCE(u.account, ''), ' ', '')) LIKE ?
+          OR LOWER(REPLACE(COALESCE(u.email, ''), ' ', '')) LIKE ?
+          OR LOWER(REPLACE(COALESCE(u.username, ''), ' ', '')) LIKE ?
+        )`);
+        params.push(
+          `%${keyword}%`,
+          `%${keyword}%`,
+          `%${keyword}%`,
+          `%${keyword}%`,
+          `%${normalizedKeyword}%`,
+          `%${normalizedKeyword}%`,
+          `%${normalizedKeyword}%`,
+        );
+      }
     }
 
     const [rows] = await pool.query(
@@ -2393,6 +2396,13 @@ app.get('/api/admin/users', (req, res) => {
         o.total_amount,
         o.item_count,
         o.created_at AS order_created_at,
+        oa.id AS order_address_id,
+        oa.receiver_name AS order_receiver_name,
+        oa.phone AS order_address_phone,
+        oa.province AS order_province,
+        oa.city AS order_city,
+        oa.district AS order_district,
+        oa.detail AS order_address_detail,
         oi.id AS order_item_id,
         oi.product_name,
         oi.sku_description,
@@ -2415,6 +2425,7 @@ app.get('/api/admin/users', (req, res) => {
       ) u
       LEFT JOIN user_addresses a ON a.user_id = u.id AND a.deleted_at IS NULL
       LEFT JOIN orders o ON o.user_id = u.id
+      LEFT JOIN user_addresses oa ON oa.id = o.address_id
       LEFT JOIN order_items oi ON oi.order_id = o.id
       ORDER BY u.created_at DESC, a.is_default DESC, o.created_at DESC, oi.id ASC
       `,
@@ -2459,6 +2470,17 @@ app.get('/api/admin/users', (req, res) => {
             totalAmount: Number(row.total_amount || 0),
             itemCount: Number(row.item_count || 0),
             createdAt: row.order_created_at,
+            shippingAddress: row.order_address_id
+              ? {
+                  id: row.order_address_id,
+                  receiverName: row.order_receiver_name,
+                  phone: row.order_address_phone,
+                  province: row.order_province,
+                  city: row.order_city,
+                  district: row.order_district,
+                  detail: row.order_address_detail,
+                }
+              : null,
             items: [],
           };
           user.orders.push(order);
@@ -2638,134 +2660,6 @@ app.post('/api/admin/products', (req, res) => {
   });
 });
 
-app.post('/api/admin/products-legacy', (req, res) => {
-  (async () => {
-    const accountCheck = await resolveAdminAccount(req.body.account);
-    if (!accountCheck.ok) {
-      return res.status(accountCheck.status).json({ success: false, message: accountCheck.message });
-    }
-
-    const productId = String(req.body.productId || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9_-]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-    const category = String(req.body.category || 'mac').trim().toLowerCase();
-    const name = String(req.body.name || '').trim();
-    const description = String(req.body.description || '').trim();
-    const baseImage = String(req.body.baseImage || '').trim();
-    const rawVariants = Array.isArray(req.body.variants) ? req.body.variants : [];
-
-    if (!productId || !name) {
-      return res.status(400).json({ success: false, message: '商品 ID 和名称不能为空' });
-    }
-
-    const variants = rawVariants
-      .map((item) => ({
-        colorName: String(item.colorName || '').trim() || '默认款式',
-        specName: String(item.specName || '').trim(),
-        connectionName: String(item.connectionName || '').trim(),
-        price: Math.max(Number(item.price || 0), 0),
-        stock: Math.max(Number(item.stock || 0), 0),
-        imageUrl: String(item.imageUrl || baseImage || '').trim(),
-      }))
-      .filter((item) => item.price > 0);
-
-    if (!variants.length) {
-      return res.status(400).json({ success: false, message: '至少需要录入一个有效 SKU' });
-    }
-
-    const minPrice = Math.min(...variants.map((item) => item.price));
-    const uniqueColors = Array.from(new Map(
-      variants
-        .filter((item) => item.colorName)
-        .map((item) => [item.colorName, { name: item.colorName, file: item.imageUrl || baseImage }]),
-    ).values());
-    const uniqueSpecs = Array.from(new Map(
-      variants
-        .map((item) => [item.specName || '默认配置', { capacity: item.specName || '默认配置', price: item.price }]),
-    ).values());
-    const configJson = {
-      category,
-      storageMode: uniqueSpecs.length ? 'absolute' : 'color-only',
-      name,
-      description,
-      price: minPrice,
-      baseImage: baseImage || variants[0].imageUrl || '',
-      colors: uniqueColors.length ? uniqueColors : [{ name: '默认款式', file: baseImage || variants[0].imageUrl || '' }],
-      storages: uniqueSpecs,
-    };
-
-    const conn = await pool.getConnection();
-    try {
-      await conn.beginTransaction();
-      await conn.query(
-        `
-        INSERT INTO product_catalog (product_id, category, name, description, base_price, config_json, is_active)
-        VALUES (?, ?, ?, ?, ?, ?, 1)
-        ON DUPLICATE KEY UPDATE
-          category = VALUES(category),
-          name = VALUES(name),
-          description = VALUES(description),
-          base_price = VALUES(base_price),
-          config_json = VALUES(config_json),
-          is_active = 1
-        `,
-        [productId, category, name, description, minPrice, JSON.stringify(configJson)],
-      );
-
-      const skuCodes = [];
-      for (const variant of variants) {
-        const parts = [variant.colorName, variant.specName, variant.connectionName].filter(Boolean);
-        const skuCode = createSkuCode(productId, parts);
-        const skuDescription = parts.join(' / ') || '默认配置';
-        skuCodes.push(skuCode);
-        await conn.query(
-          `
-          INSERT INTO product_skus
-            (product_id, sku_code, color_name, spec_name, connection_name, description, price, stock, image_url, config_json, is_active)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
-          ON DUPLICATE KEY UPDATE
-            description = VALUES(description),
-            price = VALUES(price),
-            stock = VALUES(stock),
-            image_url = VALUES(image_url),
-            config_json = VALUES(config_json),
-            is_active = 1
-          `,
-          [
-            productId,
-            skuCode,
-            variant.colorName,
-            variant.specName,
-            variant.connectionName,
-            skuDescription,
-            variant.price,
-            variant.stock,
-            variant.imageUrl,
-            JSON.stringify(variant),
-          ],
-        );
-      }
-      await conn.query(
-        'UPDATE product_skus SET is_active = 0 WHERE product_id = ? AND sku_code NOT IN (?)',
-        [productId, skuCodes],
-      );
-      await conn.commit();
-    } catch (error) {
-      await conn.rollback();
-      throw error;
-    } finally {
-      conn.release();
-    }
-
-    return res.json({ success: true, message: '商品已入库', productId });
-  })().catch((error) => {
-    console.error('后台商品入库错误:', error.message);
-    return res.status(500).json({ success: false, message: '商品入库失败，请检查 SKU 是否重复' });
-  });
-});
-
 app.put('/api/admin/skus/:skuId/stock', (req, res) => {
   (async () => {
     const accountCheck = await resolveAdminAccount(req.body.account);
@@ -2829,56 +2723,6 @@ app.put('/api/admin/skus/:skuId/stock', (req, res) => {
     }
 
     return res.json({ success: true, stock: finalStock, message: '库存已更新' });
-  })().catch((error) => {
-    console.error('后台库存调整错误:', error.message);
-    return res.status(500).json({ success: false, message: error.message || '库存调整失败' });
-  });
-});
-
-app.put('/api/admin/skus/:skuId/stock-legacy', (req, res) => {
-  (async () => {
-    const accountCheck = await resolveAdminAccount(req.body.account);
-    if (!accountCheck.ok) {
-      return res.status(accountCheck.status).json({ success: false, message: accountCheck.message });
-    }
-
-    const skuId = Number(req.params.skuId || 0);
-    if (!Number.isInteger(skuId) || skuId <= 0) {
-      return res.status(400).json({ success: false, message: 'SKU 标识无效' });
-    }
-
-    const [rows] = await pool.query('SELECT id, stock FROM product_skus WHERE id = ? LIMIT 1', [skuId]);
-    const sku = rows[0];
-    if (!sku) {
-      return res.status(404).json({ success: false, message: 'SKU 不存在' });
-    }
-
-    let delta = Number(req.body.delta);
-    if (req.body.stock !== undefined && req.body.stock !== null && req.body.stock !== '') {
-      const targetStock = Number(req.body.stock);
-      if (!Number.isInteger(targetStock) || targetStock < 0) {
-        return res.status(400).json({ success: false, message: '库存必须是非负整数' });
-      }
-      delta = targetStock - Number(sku.stock || 0);
-    }
-
-    if (!Number.isInteger(delta)) {
-      return res.status(400).json({ success: false, message: '库存调整值必须是整数' });
-    }
-
-    if (delta !== 0) {
-      await pool.query(
-        'CALL sp_adjust_inventory(?, ?, ?, ?)',
-        [skuId, delta, accountCheck.account, String(req.body.note || '后台库存调整').trim()],
-      );
-    }
-
-    const [freshRows] = await pool.query('SELECT stock FROM product_skus WHERE id = ? LIMIT 1', [skuId]);
-    return res.json({
-      success: true,
-      stock: Number((freshRows[0] && freshRows[0].stock) || 0),
-      message: '库存已更新',
-    });
   })().catch((error) => {
     console.error('后台库存调整错误:', error.message);
     return res.status(500).json({ success: false, message: error.message || '库存调整失败' });

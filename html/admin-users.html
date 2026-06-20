@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apple Store 后台 · 用户、订单与收货地址</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <style>
+      .admin-search-bar {
+        display: grid;
+        grid-template-columns: 160px 1fr auto auto;
+        gap: 10px;
+        align-items: center;
+      }
+      .admin-search-bar select,
+      .admin-search-bar input {
+        height: 40px;
+        padding: 0 12px;
+        border: 1px solid #d2d2d7;
+        border-radius: 10px;
+        font-size: 14px;
+        background: #fff;
+        color: #1d1d1f;
+      }
+      .admin-search-bar input:focus,
+      .admin-search-bar select:focus {
+        outline: none;
+        border-color: #0071e3;
+      }
+      .admin-user-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .admin-user-card {
+        border: 1px solid #e7e7ea;
+        border-radius: 16px;
+        background: #fff;
+        overflow: hidden;
+      }
+      .admin-user-row {
+        display: grid;
+        grid-template-columns: 1.4fr 1.4fr 1fr 1fr 0.6fr 0.6fr 24px;
+        gap: 12px;
+        align-items: center;
+        padding: 14px 18px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .admin-user-row:hover {
+        background: #fafafa;
+      }
+      .admin-user-row span {
+        font-size: 13px;
+        color: #1d1d1f;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .admin-user-row .muted {
+        color: #6e6e73;
+      }
+      .admin-user-row .chevron {
+        transition: transform 0.18s ease;
+        color: #6e6e73;
+        font-size: 12px;
+      }
+      .admin-user-card[data-open="1"] .chevron {
+        transform: rotate(90deg);
+      }
+      .admin-user-detail {
+        display: none;
+        padding: 0 18px 18px;
+        border-top: 1px solid #f0f0f2;
+      }
+      .admin-user-card[data-open="1"] .admin-user-detail {
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 16px;
+        padding-top: 16px;
+      }
+      .admin-user-detail h3 {
+        font-size: 15px;
+        margin: 0 0 10px;
+        color: #1d1d1f;
+      }
+      .address-list,
+      .order-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .address-item,
+      .order-item {
+        border: 1px solid #ececf0;
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: #fbfbfd;
+        font-size: 13px;
+        color: #1d1d1f;
+        line-height: 1.55;
+      }
+      .badge {
+        display: inline-block;
+        padding: 1px 8px;
+        font-size: 11px;
+        border-radius: 999px;
+        background: #eef4ff;
+        color: #0071e3;
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .badge.status-pending { background: #fff4e0; color: #b25f00; }
+      .badge.status-paid { background: #e6f4ea; color: #1e8e3e; }
+      .badge.status-shipped { background: #e7f0ff; color: #0049b3; }
+      .badge.status-completed { background: #ecf3ff; color: #0050d2; }
+      .badge.status-cancelled { background: #fdecec; color: #b32020; }
+      .order-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+      .order-meta .order-amount { color: #0071e3; }
+      .order-shipping {
+        background: #fff;
+        border: 1px dashed #d8d8de;
+        border-radius: 8px;
+        padding: 6px 10px;
+        margin: 6px 0;
+        color: #424245;
+        font-size: 12.5px;
+      }
+      .order-sub-items {
+        margin: 6px 0 0;
+        padding: 0;
+        list-style: none;
+        color: #424245;
+        font-size: 12.5px;
+      }
+      .order-sub-items li {
+        padding: 2px 0;
+      }
+      .empty-tip {
+        color: #6e6e73;
+        font-size: 13px;
+        padding: 24px 8px;
+        text-align: center;
+      }
+      @media (max-width: 880px) {
+        .admin-search-bar {
+          grid-template-columns: 1fr 1fr;
+        }
+        .admin-user-row {
+          grid-template-columns: 1fr 1fr 0.4fr 0.4fr 18px;
+        }
+        .admin-user-row .col-username,
+        .admin-user-row .col-phone {
+          display: none;
+        }
+        .admin-user-card[data-open="1"] .admin-user-detail {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="apple-nav">
+      <div class="container">
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="index.html" id="nav-logo" class="nav-logo">
+              <img src="../images/Apple-Logo.png" alt="Apple Logo" />
+            </a>
+          </li>
+          <li class="nav-item"><a href="index.html">商店</a></li>
+          <li class="nav-item"><a href="index.html?tab=mac">Mac</a></li>
+          <li class="nav-item"><a href="index.html?tab=ipad">iPad</a></li>
+          <li class="nav-item"><a href="index.html?tab=iphone">iPhone</a></li>
+          <li class="nav-item"><a href="index.html?tab=watch">Watch</a></li>
+          <li class="nav-item"><a href="index.html?tab=airpods">AirPods</a></li>
+          <li class="nav-item" id="nav-user">
+            <a href="javascript:void(0)" class="nav-avatar-link" aria-label="已登录用户">
+              <svg class="nav-avatar-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"></path>
+              </svg>
+            </a>
+            <ul class="user-menu">
+              <li><button id="admin-menu-store" type="button">返回商店</button></li>
+              <li><button id="admin-menu-logout" type="button">退出登录</button></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="admin-shell">
+      <header class="admin-header">
+        <div>
+          <p class="admin-eyebrow">Apple Store</p>
+          <h1>用户、订单与收货地址</h1>
+        </div>
+        <div class="admin-actions">
+          <a href="admin.html" class="account-back-btn">商品入库</a>
+          <button id="admin-refresh-btn" class="buy-btn" type="button">刷新</button>
+          <button id="admin-logout-btn" class="account-back-btn" type="button">退出</button>
+        </div>
+      </header>
+
+      <p id="admin-tip" class="form-tip"></p>
+
+      <section class="admin-panel">
+        <h2>搜索</h2>
+        <div class="admin-search-bar">
+          <select id="search-field">
+            <option value="">全部字段</option>
+            <option value="email">按邮箱</option>
+            <option value="phone">按电话</option>
+            <option value="account">按账号</option>
+          </select>
+          <input id="search-keyword" type="text" placeholder="输入关键字，例如 user@example.com 或 13800000000" />
+          <button id="search-btn" class="buy-btn" type="button">搜索</button>
+          <button id="reset-btn" class="account-back-btn" type="button">重置</button>
+        </div>
+      </section>
+
+      <section class="admin-panel">
+        <h2 id="list-title">所有用户</h2>
+        <div id="user-list" class="admin-user-list"></div>
+      </section>
+    </main>
+
+    <script>
+      const API_BASES = Array.from(new Set([window.location.origin, "http://localhost:3100", "http://127.0.0.1:3100"]));
+
+      function getCurrentAccount() {
+        return localStorage.getItem("appleStoreAccount") || "";
+      }
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function setTip(message, type = "") {
+        const tip = document.getElementById("admin-tip");
+        tip.textContent = message || "";
+        tip.className = `form-tip ${type}`;
+      }
+
+      async function parseResponse(response) {
+        const text = await response.text();
+        if (!text) {
+          return { data: {}, isJson: true };
+        }
+        try {
+          return { data: JSON.parse(text), isJson: true };
+        } catch (_error) {
+          return { data: { message: "接口没有返回 JSON，请确认后端服务地址正确" }, isJson: false };
+        }
+      }
+
+      async function requestApi(url, options = {}) {
+        let lastResult = null;
+        let jsonErrorResult = null;
+        for (const base of API_BASES) {
+          try {
+            const response = await fetch(`${base}${url}`, options);
+            const { data, isJson } = await parseResponse(response);
+            const result = { ok: response.ok && isJson, data };
+            if (result.ok || (isJson && (response.status === 401 || response.status === 403))) {
+              return result;
+            }
+            if (isJson && !jsonErrorResult) {
+              jsonErrorResult = result;
+            }
+            lastResult = result;
+          } catch (error) {
+            lastResult = { ok: false, data: { message: error.message || "网络异常" } };
+          }
+        }
+        return jsonErrorResult || lastResult || { ok: false, data: { message: "网络异常" } };
+      }
+
+      async function apiGet(url) {
+        return requestApi(url);
+      }
+
+      async function ensureAdmin() {
+        const account = getCurrentAccount();
+        if (!account) {
+          window.location.href = "login.html";
+          return false;
+        }
+        const { ok, data } = await apiGet(`/api/admin/me?account=${encodeURIComponent(account)}`);
+        if (!ok) {
+          localStorage.removeItem("appleStoreAccount");
+          setTip(data.message || "需要管理员 root 才能访问后台", "error");
+          setTimeout(() => {
+            window.location.href = "login.html";
+          }, 800);
+          return false;
+        }
+        setTip(`当前管理员：${account}`, "success");
+        return true;
+      }
+
+      function logoutAdmin() {
+        localStorage.removeItem("appleStoreAccount");
+        localStorage.removeItem("appleStoreIsAdmin");
+        window.location.href = "login.html";
+      }
+
+      function formatStatus(status) {
+        const map = {
+          pending: "待付款",
+          paid: "已付款",
+          shipped: "已发货",
+          completed: "已完成",
+          cancelled: "已取消",
+        };
+        return map[status] || status || "未知";
+      }
+
+      function formatDate(value) {
+        if (!value) return "";
+        try {
+          const date = new Date(value);
+          if (Number.isNaN(date.getTime())) return escapeHtml(value);
+          const pad = (n) => String(n).padStart(2, "0");
+          return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        } catch (_e) {
+          return escapeHtml(value);
+        }
+      }
+
+      function renderAddress(addr) {
+        const region = [addr.province, addr.city, addr.district].filter(Boolean).join(" ");
+        const defaultMark = addr.isDefault ? `<span class="badge">默认</span>` : "";
+        return `
+          <div class="address-item">
+            <div><strong>${escapeHtml(addr.receiverName)}</strong> · ${escapeHtml(addr.phone)}${defaultMark}</div>
+            <div class="muted">${escapeHtml(region)} ${escapeHtml(addr.detail)}</div>
+          </div>
+        `;
+      }
+
+      function renderOrderShipping(shipping) {
+        if (!shipping) return "";
+        const region = [shipping.province, shipping.city, shipping.district].filter(Boolean).join(" ");
+        return `
+          <div class="order-shipping">
+            收货：${escapeHtml(shipping.receiverName)} · ${escapeHtml(shipping.phone)} — ${escapeHtml(region)} ${escapeHtml(shipping.detail)}
+          </div>
+        `;
+      }
+
+      function renderOrder(order) {
+        const items = (order.items || []).map((it) => `
+          <li>· ${escapeHtml(it.name)} <span class="muted">${escapeHtml(it.selection || "")}</span> × ${Number(it.quantity || 0)} = RMB ${Number(it.subtotal || 0)}</li>
+        `).join("");
+        return `
+          <div class="order-item">
+            <div class="order-meta">
+              <span>${escapeHtml(order.orderNo || "")}</span>
+              <span class="badge status-${escapeHtml(order.status || "")}">${escapeHtml(formatStatus(order.status))}</span>
+              <span class="order-amount">RMB ${Number(order.totalAmount || 0)}</span>
+              <span class="muted">${escapeHtml(formatDate(order.createdAt))}</span>
+            </div>
+            ${renderOrderShipping(order.shippingAddress)}
+            <ul class="order-sub-items">${items || '<li class="muted">无订单项</li>'}</ul>
+          </div>
+        `;
+      }
+
+      function renderUsers(users) {
+        const container = document.getElementById("user-list");
+        const title = document.getElementById("list-title");
+        if (!Array.isArray(users) || users.length === 0) {
+          container.innerHTML = `<div class="empty-tip">没有匹配的用户</div>`;
+          title.textContent = "搜索结果（0）";
+          return;
+        }
+        title.textContent = `搜索结果（${users.length}）`;
+        container.innerHTML = users.map((user, idx) => {
+          const addresses = (user.addresses || []).map(renderAddress).join("") || `<div class="empty-tip">该用户暂无收货地址</div>`;
+          const orders = (user.orders || []).map(renderOrder).join("") || `<div class="empty-tip">该用户暂无订单</div>`;
+          return `
+            <article class="admin-user-card" data-open="0" data-index="${idx}">
+              <div class="admin-user-row" data-toggle="${idx}">
+                <span><strong>${escapeHtml(user.account || "—")}</strong></span>
+                <span class="muted">${escapeHtml(user.email || "—")}</span>
+                <span class="muted">${escapeHtml(user.phone || "—")}</span>
+                <span class="muted col-username">${escapeHtml(user.username || "—")}</span>
+                <span class="muted">${(user.orders || []).length} 单</span>
+                <span class="muted">${(user.addresses || []).length} 址</span>
+                <span class="chevron" aria-hidden="true">▶</span>
+              </div>
+              <div class="admin-user-detail">
+                <div>
+                  <h3>收货地址（${(user.addresses || []).length}）</h3>
+                  <div class="address-list">${addresses}</div>
+                </div>
+                <div>
+                  <h3>订单（${(user.orders || []).length}）</h3>
+                  <div class="order-list">${orders}</div>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("");
+        container.querySelectorAll(".admin-user-row").forEach((row) => {
+          row.addEventListener("click", () => {
+            const card = row.closest(".admin-user-card");
+            const opened = card.getAttribute("data-open") === "1";
+            card.setAttribute("data-open", opened ? "0" : "1");
+          });
+        });
+      }
+
+      async function loadUsers(keyword, field) {
+        const account = getCurrentAccount();
+        const qs = new URLSearchParams();
+        qs.set("account", account);
+        if (keyword) qs.set("q", keyword);
+        if (field) qs.set("field", field);
+        const { ok, data } = await apiGet(`/api/admin/users?${qs.toString()}`);
+        if (!ok) {
+          setTip(data.message || "读取用户失败", "error");
+          document.getElementById("user-list").innerHTML = "";
+          return;
+        }
+        renderUsers(data.users || []);
+      }
+
+      function runSearch() {
+        const field = document.getElementById("search-field").value;
+        const keyword = document.getElementById("search-keyword").value.trim();
+        loadUsers(keyword, field);
+      }
+
+      function resetSearch() {
+        document.getElementById("search-field").value = "";
+        document.getElementById("search-keyword").value = "";
+        loadUsers("", "");
+      }
+
+      window.onload = async function () {
+        const ok = await ensureAdmin();
+        if (!ok) return;
+        document.getElementById("admin-refresh-btn").addEventListener("click", runSearch);
+        document.getElementById("admin-logout-btn").addEventListener("click", logoutAdmin);
+        document.getElementById("admin-menu-logout").addEventListener("click", logoutAdmin);
+        document.getElementById("admin-menu-store").addEventListener("click", () => {
+          window.location.href = "index.html";
+        });
+        document.getElementById("search-btn").addEventListener("click", runSearch);
+        document.getElementById("reset-btn").addEventListener("click", resetSearch);
+        document.getElementById("search-keyword").addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            runSearch();
+          }
+        });
+        await loadUsers("", "");
+      };
+    </script>
+  </body>
+</html>
