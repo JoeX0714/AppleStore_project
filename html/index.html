@@ -4345,6 +4345,7 @@
         const commentNextBtn = document.getElementById("comment-next-btn");
         const navUser = document.getElementById("nav-user");
         const navUserLink = navUser ? navUser.querySelector(".nav-avatar-link") : null;
+        let lastUserMenuTouchAt = 0;
 
         if (addToCartBtn) {
           addToCartBtn.addEventListener("click", addCurrentProductToCart);
@@ -4373,14 +4374,24 @@
           menuLogout.addEventListener("click", logoutUser);
         }
         if (navUser && navUserLink) {
-          navUserLink.addEventListener("click", (event) => {
+          const toggleUserMenu = (event) => {
             if (!window.matchMedia("(max-width: 768px)").matches) {
               return;
+            }
+            if (event.type === "click" && Date.now() - lastUserMenuTouchAt < 500) {
+              event.preventDefault();
+              event.stopPropagation();
+              return;
+            }
+            if (event.type === "touchend") {
+              lastUserMenuTouchAt = Date.now();
             }
             event.preventDefault();
             event.stopPropagation();
             navUser.classList.toggle("menu-open");
-          });
+          };
+          navUserLink.addEventListener("touchend", toggleUserMenu, { passive: false });
+          navUserLink.addEventListener("click", toggleUserMenu);
           navUser.querySelectorAll(".user-menu button").forEach((button) => {
             button.addEventListener("click", () => {
               navUser.classList.remove("menu-open");
