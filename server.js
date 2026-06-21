@@ -1272,8 +1272,46 @@ app.get('/api/products/search', (req, res) => {
     }
 
     if (keyword) {
-      where.push('(p.name LIKE ? OR p.description LIKE ?)');
-      params.push(`%${keyword}%`, `%${keyword}%`);
+      where.push(`
+        (
+          p.name LIKE ?
+          OR p.description LIKE ?
+          OR p.product_id LIKE ?
+          OR LOWER(REPLACE(REPLACE(REPLACE(p.name, ' ', ''), '-', ''), '_', '')) LIKE ?
+          OR LOWER(REPLACE(REPLACE(REPLACE(p.product_id, ' ', ''), '-', ''), '_', '')) LIKE ?
+          OR EXISTS (
+            SELECT 1
+            FROM product_skus sx
+            WHERE sx.product_id = p.product_id
+              AND sx.is_active = 1
+              AND (
+                sx.sku_code LIKE ?
+                OR sx.description LIKE ?
+                OR sx.color_name LIKE ?
+                OR sx.spec_name LIKE ?
+                OR sx.connection_name LIKE ?
+                OR LOWER(REPLACE(REPLACE(REPLACE(sx.sku_code, ' ', ''), '-', ''), '_', '')) LIKE ?
+                OR LOWER(REPLACE(REPLACE(REPLACE(CONCAT_WS('', sx.description, sx.color_name, sx.spec_name, sx.connection_name), ' ', ''), '-', ''), '_', '')) LIKE ?
+              )
+          )
+        )
+      `);
+      const fuzzyKeyword = `%${keyword}%`;
+      const normalizedLike = `%${normalizedKeyword}%`;
+      params.push(
+        fuzzyKeyword,
+        fuzzyKeyword,
+        fuzzyKeyword,
+        normalizedLike,
+        normalizedLike,
+        fuzzyKeyword,
+        fuzzyKeyword,
+        fuzzyKeyword,
+        fuzzyKeyword,
+        fuzzyKeyword,
+        normalizedLike,
+        normalizedLike,
+      );
     }
 
     let orderSql = 'total_sales DESC, updated_at DESC';
@@ -1310,7 +1348,7 @@ app.get('/api/products/search', (req, res) => {
 
     if (keyword || category) {
       await pool.query(
-        'INSERT INTO product_search_logs (account, keyword, category, result_count) VALUES (?, ?, ?)',
+        'INSERT INTO product_search_logs (account, keyword, category, result_count) VALUES (?, ?, ?, ?)',
         [account || null, keyword || '', category || null, rows.length],
       );
     }
@@ -1454,7 +1492,7 @@ app.post('/api/cart/items', (req, res) => {
       INSERT INTO cart_items (user_id, sku_id, quantity)
       VALUES (?, ?, ?)
       ON DUPLICATE KEY UPDATE
-        quantity = LEAST(quantity + VALUES(quantity), 99),
+        quantity = LEAST(quantity + VALUES(quantity), 99)
       `,
       [
         accountCheck.userId,
@@ -2455,10 +2493,6 @@ app.post('/api/admin/products', (req, res) => {
 
     if (!PRODUCT_CATEGORIES.has(category)) {
       return res.status(400).json({ success: false, message: '商品种类无效' });
-    }
-
-    if (!PRODUCT_CATEGORIES.has(category)) {
-      return res.status(400).json({ success: false, message: '鍟嗗搧绉嶇被鏃犳晥' });
     }
 
     const variants = rawVariants

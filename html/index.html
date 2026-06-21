@@ -43,6 +43,18 @@
           <li class="nav-item">
             <a href="javascript:void(0)" id="nav-AirPods">AirPods</a>
           </li>
+          <li class="nav-item nav-search-item">
+            <form id="product-search-form" class="nav-search-form" autocomplete="off">
+              <button id="product-search-btn" class="nav-search-btn" type="submit" aria-label="搜索商品" title="搜索商品">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="11" cy="11" r="6"></circle>
+                  <path d="M16 16l4 4"></path>
+                </svg>
+              </button>
+              <input id="product-search-input" type="search" placeholder="搜索商品" aria-label="搜索商品" />
+              <span id="product-search-message" class="nav-search-message" role="status"></span>
+            </form>
+          </li>
           <li class="nav-item">
             <a href="login.html" id="nav-login">登录</a>
           </li>
@@ -3116,10 +3128,6 @@
         }
       }
 
-      function writeList(key, list) {
-        localStorage.setItem(key, JSON.stringify(list));
-      }
-
       function getCurrentSelectionText() {
         return getCurrentSelectionParts().join(" / ");
       }
@@ -3281,7 +3289,6 @@
           "watch-page",
           "iphone-page",
           "airpods-page",
-          "other-page",
           "purchase-page",
           "cart-page",
           "order-page",
@@ -3736,49 +3743,55 @@
         return savedAddress ? savedAddress.id : null;
       }
 
-      async function runProductSearch() {
-        const resultsEl = document.getElementById("product-search-results");
-        if (!resultsEl) {
+      function setProductSearchMessage(message, type = "") {
+        const messageEl = document.getElementById("product-search-message");
+        if (!messageEl) {
           return;
         }
-        const q = document.getElementById("product-search-input").value.trim();
-        const category = document.getElementById("product-search-category").value;
-        const sort = document.getElementById("product-search-sort").value;
-        const params = new URLSearchParams({ q, category, sort });
+        messageEl.textContent = message || "";
+        messageEl.className = `nav-search-message ${type}`.trim();
+      }
+
+      async function runProductSearch() {
+        const inputEl = document.getElementById("product-search-input");
+        if (!inputEl) {
+          return;
+        }
+        const q = inputEl.value.trim();
+        if (!q) {
+          setProductSearchMessage("请输入商品名称", "error");
+          inputEl.focus();
+          return;
+        }
+
+        const params = new URLSearchParams({ q, category: "", sort: "popular" });
         const account = getCurrentAccount();
         if (account) {
           params.set("account", account);
         }
 
-        resultsEl.innerHTML = '<p class="empty-tip">正在搜索...</p>';
+        setProductSearchMessage("搜索中...", "");
         try {
           const { ok, data } = await apiGet(`/api/products/search?${params.toString()}`);
           if (!ok) {
-            resultsEl.innerHTML = `<p class="empty-tip">${escapeHtml(data.message || "搜索失败")}</p>`;
+            setProductSearchMessage(data.message || "搜索失败", "error");
             return;
           }
           const products = Array.isArray(data.products) ? data.products : [];
           if (!products.length) {
-            resultsEl.innerHTML = '<p class="empty-tip">没有找到符合条件的商品。</p>';
+            setProductSearchMessage("暂无该商品", "error");
             return;
           }
-          resultsEl.innerHTML = products
-            .map(
-              (item) => `
-              <article class="search-result-card">
-                ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" />` : ""}
-                <div>
-                  <p class="item-title">${escapeHtml(item.name)}</p>
-                  <p class="item-meta">${escapeHtml(item.description || item.category)}</p>
-                  <p class="item-meta">RMB ${item.price} 起 · 库存 ${item.stock} · 销量 ${item.sales}</p>
-                </div>
-                <button type="button" class="buy-btn" onclick="buyProduct('${escapeHtml(item.productId)}')">购买</button>
-              </article>
-            `,
-            )
-            .join("");
+          const matched = products.find((item) => item.productId && productData[item.productId]) || products[0];
+          if (!matched || !matched.productId || !productData[matched.productId]) {
+            setProductSearchMessage("暂无该商品", "error");
+            return;
+          }
+          setProductSearchMessage("");
+          inputEl.blur();
+          buyProduct(matched.productId);
         } catch (_error) {
-          resultsEl.innerHTML = '<p class="empty-tip">网络异常，搜索暂时不可用。</p>';
+          setProductSearchMessage("搜索暂时不可用", "error");
         }
       }
 
@@ -4301,10 +4314,6 @@
         updateCurrentSkuState();
       }
 
-      function showWatchTip() {
-        alert("Apple Watch 购买详情页即将上线，敬请期待。");
-      }
-
       function showAirPodsTip() {
         alert("AirPods 购买详情页即将上线，敬请期待。");
       }
@@ -4324,10 +4333,8 @@
         const passwordForm = document.getElementById("password-form");
         const addressForm = document.getElementById("address-form");
         const addressResetBtn = document.getElementById("address-reset-btn");
-        const productSearchBtn = document.getElementById("product-search-btn");
+        const productSearchForm = document.getElementById("product-search-form");
         const productSearchInput = document.getElementById("product-search-input");
-        const productSearchCategory = document.getElementById("product-search-category");
-        const productSearchSort = document.getElementById("product-search-sort");
         const commentSubmitBtn = document.getElementById("comment-submit-btn");
         const commentInput = document.getElementById("comment-input");
         const commentSortSelect = document.getElementById("comment-sort-select");
@@ -4428,8 +4435,11 @@
         if (addressResetBtn) {
           addressResetBtn.addEventListener("click", resetAddressForm);
         }
-        if (productSearchBtn) {
-          productSearchBtn.addEventListener("click", runProductSearch);
+        if (productSearchForm) {
+          productSearchForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            runProductSearch();
+          });
         }
         if (productSearchInput) {
           productSearchInput.addEventListener("keydown", (event) => {
@@ -4439,11 +4449,6 @@
             }
           });
         }
-        [productSearchCategory, productSearchSort].forEach((el) => {
-          if (el) {
-            el.addEventListener("change", runProductSearch);
-          }
-        });
         if (commentSubmitBtn) {
           commentSubmitBtn.addEventListener("click", submitComment);
         }
@@ -4480,7 +4485,6 @@
         const watch = document.getElementById("watch-page");
         const iphone = document.getElementById("iphone-page");
         const airpods = document.getElementById("airpods-page");
-        const other = document.getElementById("other-page");
         const purchase = document.getElementById("purchase-page"); 
         if (btnMac) {
           btnMac.onclick = function () {
@@ -4568,9 +4572,6 @@
             watch.style.display = "none";
             iphone.style.display = "none";
             airpods.style.display = "none";
-            if (other) {
-              other.style.display = "none";
-            }
             purchase.style.display = "none";
             home.style.display = "block";
           };
@@ -4589,7 +4590,6 @@
           btnAirPods.onclick();
         }
 
-        runProductSearch();
         loadHomeSalesRank();
 
         (async () => {
