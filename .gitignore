@@ -1,0 +1,9 @@
+.claude/
+.idea/
+.vs/
+.vscode/
+node_modules/
+render_tmp/
+tmp_render/
+images/uploads/
+C*UsersSum.claudesettings.json
