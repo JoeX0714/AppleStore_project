@@ -4343,6 +4343,8 @@
         const commentSortSelect = document.getElementById("comment-sort-select");
         const commentPrevBtn = document.getElementById("comment-prev-btn");
         const commentNextBtn = document.getElementById("comment-next-btn");
+        const navUser = document.getElementById("nav-user");
+        const navUserLink = navUser ? navUser.querySelector(".nav-avatar-link") : null;
 
         if (addToCartBtn) {
           addToCartBtn.addEventListener("click", addCurrentProductToCart);
@@ -4369,6 +4371,26 @@
         }
         if (menuLogout) {
           menuLogout.addEventListener("click", logoutUser);
+        }
+        if (navUser && navUserLink) {
+          navUserLink.addEventListener("click", (event) => {
+            if (!window.matchMedia("(max-width: 768px)").matches) {
+              return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            navUser.classList.toggle("menu-open");
+          });
+          navUser.querySelectorAll(".user-menu button").forEach((button) => {
+            button.addEventListener("click", () => {
+              navUser.classList.remove("menu-open");
+            });
+          });
+          document.addEventListener("click", (event) => {
+            if (!navUser.contains(event.target)) {
+              navUser.classList.remove("menu-open");
+            }
+          });
         }
         if (cartSelectAll) {
           cartSelectAll.addEventListener("change", (event) => {

@@ -195,7 +195,8 @@ body {
 }
 
 #nav-user:hover .user-menu,
-#nav-user:focus-within .user-menu {
+#nav-user:focus-within .user-menu,
+#nav-user.menu-open .user-menu {
   display: block;
 }
 
@@ -1494,6 +1495,18 @@ body {
   .nav-search-form:focus-within #product-search-input,
   #product-search-input:not(:placeholder-shown) {
     width: min(128px, 34vw);
+  }
+
+  #nav-user {
+    position: static;
+  }
+
+  .user-menu {
+    position: fixed;
+    top: 44px;
+    right: 10px;
+    min-width: 188px;
+    border-radius: 0 0 10px 10px;
   }
 
   .purchase-container {
