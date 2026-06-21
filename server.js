@@ -10,6 +10,7 @@ const app = express();
 const APP_PORT = Number(process.env.APP_PORT || 3100);
 const DEFAULT_ADMIN_ACCOUNT = 'root';
 const DEFAULT_ADMIN_PASSWORD = '123456';
+const DEFAULT_SKU_STOCK = 999;
 const PRODUCT_CATEGORIES = new Set(['mac', 'ipad', 'iphone', 'watch', 'airpods']);
 const uploadDir = path.join(__dirname, 'images', 'uploads');
 
@@ -162,7 +163,7 @@ function buildSkuRowsFromProduct(productId, payload) {
   return rows;
 }
 
-async function syncProductSkus(conn, productId, payload, defaultStock = 30) {
+async function syncProductSkus(conn, productId, payload, defaultStock = DEFAULT_SKU_STOCK) {
   const rows = buildSkuRowsFromProduct(productId, payload);
   if (!rows.length) {
     return;
@@ -236,6 +237,27 @@ async function ensureSkusForExistingCatalog() {
   }
 }
 
+async function seedActiveSkuStockOnce(defaultStock = DEFAULT_SKU_STOCK) {
+  const [markerRows] = await pool.query(
+    "SELECT id FROM admin_audit_logs WHERE action = 'stock_seed_999' LIMIT 1",
+  );
+  if (markerRows.length) {
+    return;
+  }
+
+  await pool.query(
+    'UPDATE product_skus SET stock = ? WHERE is_active = 1',
+    [defaultStock],
+  );
+  await pool.query(
+    `
+    INSERT INTO admin_audit_logs (admin_account, action, target_type, target_id, detail_json)
+    VALUES (?, 'stock_seed_999', 'inventory', 'all-active-skus', ?)
+    `,
+    ['system', JSON.stringify({ stock: defaultStock })],
+  );
+}
+
 function normalizeAccount(value) {
   const trimmed = String(value || '').trim();
   return trimmed.includes('@') ? trimmed.toLowerCase() : trimmed.replace(/\s+/g, '');
@@ -270,7 +292,6 @@ async function initDatabase() {
       phone VARCHAR(20) NULL,
       username VARCHAR(191) NULL,
       password_hash VARCHAR(255) NULL,
-      password VARCHAR(255) NULL,
       role ENUM('customer', 'admin') NOT NULL DEFAULT 'customer',
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -282,7 +303,6 @@ async function initDatabase() {
   await ensureColumn('users', 'phone', 'phone VARCHAR(20) NULL');
   await ensureColumn('users', 'username', 'username VARCHAR(191) NULL');
   await ensureColumn('users', 'password_hash', 'password_hash VARCHAR(255) NULL');
-  await ensureColumn('users', 'password', 'password VARCHAR(255) NULL');
   await ensureColumn('users', 'role', "role ENUM('customer', 'admin') NOT NULL DEFAULT 'customer'");
   await loadUserColumns();
   await ensureIndex('CREATE UNIQUE INDEX uk_users_account ON users(account)');
@@ -334,41 +354,18 @@ async function initDatabase() {
       base_price INT NOT NULL DEFAULT 0,
       config_json JSON NOT NULL,
       is_active TINYINT(1) NOT NULL DEFAULT 1,
-      primary_image VARCHAR(255)
-        GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(config_json, '$.baseImage'))) STORED,
-      storage_mode VARCHAR(40)
-        GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(config_json, '$.storageMode'))) STORED,
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (product_id),
       INDEX idx_product_catalog_category (category),
       INDEX idx_product_catalog_category_price (category, base_price),
-      INDEX idx_product_catalog_storage_mode (storage_mode),
       FULLTEXT KEY ft_product_catalog_name_desc (name, description)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
   await ensureColumn('product_catalog', 'description', 'description TEXT NULL');
   await ensureColumn('product_catalog', 'is_active', 'is_active TINYINT(1) NOT NULL DEFAULT 1');
-  try {
-    await ensureColumn(
-      'product_catalog',
-      'primary_image',
-      "primary_image VARCHAR(255) GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(config_json, '$.baseImage'))) STORED",
-    );
-    await ensureColumn(
-      'product_catalog',
-      'storage_mode',
-      "storage_mode VARCHAR(40) GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(config_json, '$.storageMode'))) STORED",
-    );
-  } catch (error) {
-    console.warn('生成列初始化失败，搜索接口会使用 JSON_EXTRACT 回退:', error.message);
-  }
   await ensureIndex('CREATE INDEX idx_product_catalog_category_price ON product_catalog(category, base_price)');
   await ensureIndex('CREATE INDEX idx_product_catalog_active_category_updated ON product_catalog(is_active, category, updated_at)');
-  try {
-    await ensureIndex('CREATE INDEX idx_product_catalog_storage_mode ON product_catalog(storage_mode)');
-  } catch (_error) {
-  }
   await ensureIndex('CREATE FULLTEXT INDEX ft_product_catalog_name_desc ON product_catalog(name, description)');
 
   await pool.query(`
@@ -437,8 +434,6 @@ async function initDatabase() {
       user_id BIGINT UNSIGNED NOT NULL,
       sku_id BIGINT UNSIGNED NOT NULL,
       quantity INT NOT NULL DEFAULT 1,
-      selected TINYINT(1) NOT NULL DEFAULT 1,
-      snapshot_json JSON NULL,
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (id),
@@ -494,7 +489,6 @@ async function initDatabase() {
       quantity INT NOT NULL DEFAULT 1,
       subtotal INT NOT NULL DEFAULT 0,
       image_url VARCHAR(255) NULL,
-      snapshot_json JSON NULL,
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (id),
       KEY idx_order_items_order (order_id),
@@ -510,46 +504,7 @@ async function initDatabase() {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
 
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS payments (
-      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-      order_id BIGINT UNSIGNED NOT NULL,
-      method ENUM('mock_card', 'wechat', 'alipay', 'apple_pay') NOT NULL DEFAULT 'apple_pay',
-      amount INT NOT NULL DEFAULT 0,
-      status ENUM('pending', 'paid', 'failed', 'refunded') NOT NULL DEFAULT 'pending',
-      transaction_no VARCHAR(80) NULL,
-      paid_at DATETIME NULL,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      PRIMARY KEY (id),
-      UNIQUE KEY uk_payments_order (order_id),
-      UNIQUE KEY uk_payments_transaction (transaction_no),
-      KEY idx_payments_status_paid (status, paid_at),
-      CONSTRAINT fk_payments_order
-        FOREIGN KEY (order_id) REFERENCES orders(id)
-        ON DELETE CASCADE ON UPDATE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-  `);
 
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS shipments (
-      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-      order_id BIGINT UNSIGNED NOT NULL,
-      status ENUM('pending', 'shipped', 'delivered') NOT NULL DEFAULT 'pending',
-      carrier VARCHAR(80) NULL,
-      tracking_no VARCHAR(80) NULL,
-      shipped_at DATETIME NULL,
-      delivered_at DATETIME NULL,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      PRIMARY KEY (id),
-      UNIQUE KEY uk_shipments_order (order_id),
-      KEY idx_shipments_tracking (tracking_no),
-      CONSTRAINT fk_shipments_order
-        FOREIGN KEY (order_id) REFERENCES orders(id)
-        ON DELETE CASCADE ON UPDATE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-  `);
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS order_status_logs (
@@ -617,19 +572,6 @@ async function initDatabase() {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
 
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS user_store_data (
-      user_id BIGINT UNSIGNED NOT NULL,
-      cart_json JSON NOT NULL,
-      orders_json JSON NOT NULL,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      PRIMARY KEY (user_id),
-      CONSTRAINT fk_user_store_data_user
-        FOREIGN KEY (user_id) REFERENCES users(id)
-        ON DELETE CASCADE ON UPDATE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-  `);
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS admin_audit_logs (
@@ -737,6 +679,7 @@ async function initDatabase() {
   `);
 
   await ensureSkusForExistingCatalog();
+  await seedActiveSkuStockOnce();
   await ensureDefaultAdminUser();
 }
 
@@ -787,7 +730,6 @@ async function ensureDefaultAdminUser() {
     if (userColumns.has('phone')) updateMap.phone = null;
     if (userColumns.has('username')) updateMap.username = DEFAULT_ADMIN_ACCOUNT;
     if (userColumns.has('password_hash')) updateMap.password_hash = hash;
-    if (userColumns.has('password')) updateMap.password = null;
     if (userColumns.has('role')) updateMap.role = 'admin';
     const entries = Object.entries(updateMap);
     if (entries.length) {
@@ -805,7 +747,6 @@ async function ensureDefaultAdminUser() {
   if (userColumns.has('phone')) insertMap.phone = null;
   if (userColumns.has('username')) insertMap.username = DEFAULT_ADMIN_ACCOUNT;
   if (userColumns.has('password_hash')) insertMap.password_hash = hash;
-  if (userColumns.has('password')) insertMap.password = null;
   if (userColumns.has('role')) insertMap.role = 'admin';
 
   const columns = Object.keys(insertMap);
@@ -1168,10 +1109,6 @@ async function createPaidOrder({ userId, addressId, cartItemIds = [], directItem
         quantity: item.quantity,
         subtotal: Number(sku.price || 0) * item.quantity,
         imageUrl: sku.image_url || getProductImageFromConfig(sku.product_config),
-        snapshotJson: JSON.stringify({
-          sku: parseJsonObject(sku.config_json),
-          product: parseJsonObject(sku.product_config),
-        }),
         stockAfter,
       });
     }
@@ -1192,8 +1129,8 @@ async function createPaidOrder({ userId, addressId, cartItemIds = [], directItem
       await conn.query(
         `
         INSERT INTO order_items
-          (order_id, sku_id, product_id, product_name, sku_description, unit_price, quantity, subtotal, image_url, snapshot_json)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          (order_id, sku_id, product_id, product_name, sku_description, unit_price, quantity, subtotal, image_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `,
         [
           orderId,
@@ -1205,7 +1142,6 @@ async function createPaidOrder({ userId, addressId, cartItemIds = [], directItem
           item.quantity,
           item.subtotal,
           item.imageUrl,
-          item.snapshotJson,
         ],
       );
       await conn.query(
@@ -1218,17 +1154,6 @@ async function createPaidOrder({ userId, addressId, cartItemIds = [], directItem
       );
     }
 
-    await conn.query(
-      `
-      INSERT INTO payments (order_id, method, amount, status, transaction_no, paid_at)
-      VALUES (?, 'apple_pay', ?, 'paid', ?, NOW())
-      `,
-      [orderId, totalAmount, `PAY${orderNo}`],
-    );
-    await conn.query(
-      'INSERT INTO shipments (order_id, status) VALUES (?, ?)',
-      [orderId, 'pending'],
-    );
     await conn.query(
       'INSERT INTO order_status_logs (order_id, from_status, to_status, note) VALUES (?, ?, ?, ?)',
       [orderId, null, 'paid', '模拟支付成功并扣减库存'],
@@ -1385,7 +1310,7 @@ app.get('/api/products/search', (req, res) => {
 
     if (keyword || category) {
       await pool.query(
-        'INSERT INTO product_search_logs (account, keyword, category, result_count) VALUES (?, ?, ?, ?)',
+        'INSERT INTO product_search_logs (account, keyword, category, result_count) VALUES (?, ?, ?)',
         [account || null, keyword || '', category || null, rows.length],
       );
     }
@@ -1466,61 +1391,7 @@ app.get('/api/user-store/:account', (req, res) => {
   });
 });
 
-app.put('/api/user-store/:account/cart', (req, res) => {
-  (async () => {
-    const accountCheck = await resolveValidAccount(req.params.account);
-    if (!accountCheck.ok) {
-      return res.status(accountCheck.status).json({ success: false, message: accountCheck.message });
-    }
 
-    const cart = Array.isArray(req.body.cart) ? req.body.cart : null;
-    if (!cart) {
-      return res.status(400).json({ success: false, message: '购物车数据格式错误' });
-    }
-
-    await pool.query(
-      `
-      INSERT INTO user_store_data (user_id, cart_json, orders_json)
-      VALUES (?, ?, JSON_ARRAY())
-      ON DUPLICATE KEY UPDATE cart_json = VALUES(cart_json)
-      `,
-      [accountCheck.userId, JSON.stringify(cart)],
-    );
-
-    return res.json({ success: true, message: '购物车已同步到数据库' });
-  })().catch((error) => {
-    console.error('同步购物车错误:', error.message);
-    return res.status(500).json({ success: false, message: '同步购物车失败，请稍后重试' });
-  });
-});
-
-app.put('/api/user-store/:account/orders', (req, res) => {
-  (async () => {
-    const accountCheck = await resolveValidAccount(req.params.account);
-    if (!accountCheck.ok) {
-      return res.status(accountCheck.status).json({ success: false, message: accountCheck.message });
-    }
-
-    const orders = Array.isArray(req.body.orders) ? req.body.orders : null;
-    if (!orders) {
-      return res.status(400).json({ success: false, message: '订单数据格式错误' });
-    }
-
-    await pool.query(
-      `
-      INSERT INTO user_store_data (user_id, cart_json, orders_json)
-      VALUES (?, JSON_ARRAY(), ?)
-      ON DUPLICATE KEY UPDATE orders_json = VALUES(orders_json)
-      `,
-      [accountCheck.userId, JSON.stringify(orders)],
-    );
-
-    return res.json({ success: true, message: '订单已同步到数据库' });
-  })().catch((error) => {
-    console.error('同步订单错误:', error.message);
-    return res.status(500).json({ success: false, message: '同步订单失败，请稍后重试' });
-  });
-});
 
 app.get('/api/cart/:account', (req, res) => {
   (async () => {
@@ -1580,24 +1451,15 @@ app.post('/api/cart/items', (req, res) => {
 
     await pool.query(
       `
-      INSERT INTO cart_items (user_id, sku_id, quantity, snapshot_json)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO cart_items (user_id, sku_id, quantity)
+      VALUES (?, ?, ?)
       ON DUPLICATE KEY UPDATE
         quantity = LEAST(quantity + VALUES(quantity), 99),
-        snapshot_json = VALUES(snapshot_json),
-        selected = 1
       `,
       [
         accountCheck.userId,
         skuId,
         quantity,
-        JSON.stringify({
-          productId: sku.product_id,
-          name: sku.name,
-          selection: sku.description,
-          price: sku.price,
-          image: sku.image_url || getProductImageFromConfig(sku.config_json),
-        }),
       ],
     );
 
@@ -2066,7 +1928,7 @@ app.post('/api/products/:productId/comments', (req, res) => {
     }
 
     const [insertResult] = await pool.query(
-      'INSERT INTO product_comments (product_id, account, content, parent_id) VALUES (?, ?, ?, ?)',
+      'INSERT INTO product_comments (product_id, account, content, parent_id) VALUES (?, ?, ?)',
       [productId, accountCheck.account, content, parentId],
     );
 
@@ -2203,6 +2065,68 @@ app.get('/api/admin/summary', (req, res) => {
   })().catch((error) => {
     console.error('后台概览错误:', error.message);
     return res.status(500).json({ success: false, message: '读取后台概览失败' });
+  });
+});
+
+app.get('/api/products/sales-rank', (req, res) => {
+  (async () => {
+    const [rows] = await pool.query(
+      `
+      SELECT
+        s.id AS sku_id,
+        s.product_id,
+        s.sku_code,
+        s.description AS sku_description,
+        s.price,
+        s.stock,
+        s.sales_count AS current_sales_count,
+        s.image_url,
+        p.category,
+        p.name,
+        MAX(JSON_UNQUOTE(JSON_EXTRACT(p.config_json, '$.baseImage'))) AS product_image,
+        COALESCE(SUM(oi.quantity), 0) AS total_sales,
+        COALESCE(SUM(oi.subtotal), 0) AS total_revenue
+      FROM product_skus s
+      JOIN product_catalog p ON p.product_id = s.product_id
+      LEFT JOIN order_items oi ON oi.sku_id = s.id
+      WHERE s.is_active = 1
+        AND p.is_active = 1
+      GROUP BY
+        s.id,
+        s.product_id,
+        s.sku_code,
+        s.description,
+        s.price,
+        s.stock,
+        s.sales_count,
+        s.image_url,
+        p.category,
+        p.name
+      ORDER BY total_sales DESC, total_revenue DESC, s.sales_count DESC, s.id ASC
+      LIMIT 5
+      `,
+    );
+
+    return res.json({
+      success: true,
+      products: rows.map((item, index) => ({
+        rank: index + 1,
+        productId: item.product_id,
+        skuId: item.sku_id,
+        skuCode: item.sku_code,
+        category: item.category,
+        name: item.name,
+        skuDescription: item.sku_description,
+        price: Number(item.price || 0),
+        stock: Number(item.stock || 0),
+        totalSales: Number(item.total_sales || 0),
+        totalRevenue: Number(item.total_revenue || 0),
+        image: toImagePath(item.image_url || item.product_image),
+      })),
+    });
+  })().catch((error) => {
+    console.error('销量排行错误:', error.message);
+    return res.status(500).json({ success: false, message: '读取销量排行失败' });
   });
 });
 
@@ -2760,7 +2684,6 @@ app.post('/api/register', (req, res) => {
     if (userColumns.has('phone') && isPhone(account)) insertMap.phone = account;
     if (userColumns.has('username')) insertMap.username = account;
     if (userColumns.has('password_hash')) insertMap.password_hash = hash;
-    if (userColumns.has('password')) insertMap.password = null;
 
     const columns = Object.keys(insertMap);
     const values = Object.values(insertMap);
@@ -2817,18 +2740,12 @@ app.post('/api/login', (req, res) => {
     let passwordMatched = false;
     if (user.password_hash) {
       passwordMatched = await bcrypt.compare(password, user.password_hash);
-    } else if (user.password) {
-      passwordMatched = password === user.password;
     }
 
     if (!passwordMatched) {
       return res.status(401).json({ success: false, message: '密码错误，请重试' });
     }
 
-    if (!user.password_hash && userColumns.has('password_hash')) {
-      const migratedHash = await bcrypt.hash(password, 10);
-      await pool.query('UPDATE users SET password_hash = ?, password = NULL WHERE id = ?', [migratedHash, user.id]);
-    }
 
     if (userColumns.has('account') && !user.account) {
       await pool.query('UPDATE users SET account = ? WHERE id = ?', [account, user.id]);
@@ -2872,8 +2789,6 @@ app.post('/api/change-password', (req, res) => {
     let oldPasswordMatched = false;
     if (user.password_hash) {
       oldPasswordMatched = await bcrypt.compare(oldPassword, user.password_hash);
-    } else if (user.password) {
-      oldPasswordMatched = oldPassword === user.password;
     }
 
     if (!oldPasswordMatched) {
@@ -2881,7 +2796,7 @@ app.post('/api/change-password', (req, res) => {
     }
 
     const newHash = await bcrypt.hash(newPassword, 10);
-    await pool.query('UPDATE users SET password_hash = ?, password = NULL WHERE id = ?', [newHash, user.id]);
+    await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [newHash, user.id]);
 
     return res.json({ success: true, message: '密码修改成功' });
   })().catch((error) => {

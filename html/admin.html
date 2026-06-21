@@ -74,10 +74,26 @@
             <input id="admin-color" type="text" placeholder="款式/颜色，例如 银色" />
             <input id="admin-spec" type="text" placeholder="规格，例如 256GB" />
             <input id="admin-price" type="number" min="1" step="1" placeholder="价格" required />
-            <input id="admin-stock" type="number" min="0" step="1" placeholder="库存" required />
+            <input id="admin-stock" type="number" min="0" step="1" value="999" placeholder="库存" required />
           </div>
           <button type="submit" class="buy-btn">添加商品</button>
         </form>
+      </section>
+
+      <section class="admin-panel">
+        <div class="admin-panel-title">
+          <h2>库存总览</h2>
+          <div class="admin-filter-row">
+            <input id="admin-inventory-search" type="search" placeholder="按商品名称或 SKU 搜索" />
+            <button id="admin-inventory-search-btn" class="admin-icon-search" type="button" aria-label="搜索库存" title="搜索库存">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m20 20-3.5-3.5"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div id="admin-inventory-list" class="admin-product-list"></div>
       </section>
     </main>
 
@@ -93,6 +109,15 @@
         const tip = document.getElementById("admin-tip");
         tip.textContent = message || "";
         tip.className = `form-tip ${type}`;
+      }
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
       }
 
       async function parseResponse(response) {
@@ -141,6 +166,14 @@
         });
       }
 
+      async function apiPut(url, payload) {
+        return requestApi(url, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
+
       function makeProductId(name, category) {
         const base = `${category}-${name}`
           .trim()
@@ -183,12 +216,79 @@
           .join("");
       }
 
+      function renderInventory(products) {
+        const listEl = document.getElementById("admin-inventory-list");
+        if (!listEl) {
+          return;
+        }
+
+        if (!Array.isArray(products) || !products.length) {
+          listEl.innerHTML = '<p class="empty-tip">没有匹配的商品库存。</p>';
+          return;
+        }
+
+        listEl.innerHTML = products
+          .map((product) => {
+            const skus = Array.isArray(product.skus) ? product.skus : [];
+            const totalStock = skus.reduce((sum, sku) => sum + Number(sku.stock || 0), 0);
+            const image = escapeHtml(product.image || "../images/Apple-Logo.png");
+            const productName = escapeHtml(product.name || product.productId);
+            const category = escapeHtml(product.category || "");
+            return `
+              <div class="admin-product-card">
+                <div class="admin-product-head">
+                  <img src="${image}" alt="${productName || "商品"}" />
+                  <div>
+                    <p class="item-title">${productName}</p>
+                    <p class="item-meta">${category} · 总库存 ${totalStock} · SKU ${skus.length}</p>
+                  </div>
+                </div>
+                <div class="admin-sku-table">
+                  ${skus.length
+                    ? skus.map((sku) => `
+                        <div class="admin-sku-row" data-sku-id="${sku.id}">
+                          <span>${escapeHtml(sku.description || sku.skuCode)}</span>
+                          <span>RMB ${sku.price || 0}</span>
+                          <strong class="admin-stock-value">${sku.stock || 0}</strong>
+                          <input class="admin-stock-delta" type="number" step="1" value="1" aria-label="库存调整数量" />
+                          <div class="admin-stock-actions">
+                            <button type="button" onclick="adjustSkuStock(${sku.id}, 'minus')">-</button>
+                            <button type="button" onclick="adjustSkuStock(${sku.id}, 'plus')">+</button>
+                          </div>
+                        </div>
+                      `).join("")
+                    : '<p class="empty-tip">该商品暂无可用 SKU。</p>'}
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      async function loadInventory() {
+        const account = getCurrentAccount();
+        const searchInput = document.getElementById("admin-inventory-search");
+        const keyword = searchInput ? searchInput.value.trim() : "";
+        const params = new URLSearchParams({ account });
+        if (keyword) {
+          params.set("q", keyword);
+        }
+        const result = await apiGet(`/api/admin/products?${params.toString()}`);
+        if (!result.ok) {
+          setTip(result.data.message || "读取库存失败", "error");
+          renderInventory([]);
+          return;
+        }
+        renderInventory(result.data.products || []);
+      }
+
       async function loadAdminData() {
         const account = getCurrentAccount();
         const summaryResult = await apiGet(`/api/admin/summary?account=${encodeURIComponent(account)}`);
         if (summaryResult.ok) {
           renderSummary(summaryResult.data.summary || {});
         }
+        await loadInventory();
       }
 
       function logoutAdmin() {
@@ -224,10 +324,29 @@
           return;
         }
         document.getElementById("admin-product-form").reset();
+        document.getElementById("admin-stock").value = "999";
         document.getElementById("admin-image-preview").removeAttribute("src");
         document.getElementById("admin-image-label").textContent = "选择商品图片";
         imageFilePayload = null;
         setTip(data.message || "商品已入库", "success");
+        await loadAdminData();
+      }
+
+      async function adjustSkuStock(skuId, direction) {
+        const row = document.querySelector(`.admin-sku-row[data-sku-id="${skuId}"]`);
+        const input = row ? row.querySelector(".admin-stock-delta") : null;
+        const amount = Math.abs(Number(input ? input.value : 1) || 1);
+        const delta = direction === "minus" ? -amount : amount;
+        const { ok, data } = await apiPut(`/api/admin/skus/${skuId}/stock`, {
+          account: getCurrentAccount(),
+          delta,
+          note: direction === "minus" ? "后台库存减少" : "后台库存增加",
+        });
+        if (!ok) {
+          setTip(data.message || "库存调整失败", "error");
+          return;
+        }
+        setTip(data.message || "库存已更新", "success");
         await loadAdminData();
       }
 
@@ -261,6 +380,13 @@
           window.location.href = "index.html";
         });
         document.getElementById("admin-product-form").addEventListener("submit", saveProduct);
+        document.getElementById("admin-inventory-search-btn").addEventListener("click", loadInventory);
+        document.getElementById("admin-inventory-search").addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            loadInventory();
+          }
+        });
         bindImageInput();
         await loadAdminData();
       };

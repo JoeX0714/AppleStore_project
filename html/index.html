@@ -140,6 +140,16 @@
           <h1>欢迎来到 Apple Store</h1>
           <p>请点击导航栏上的商品开始选购</p>
         </div>
+        <section class="home-sales-section" aria-labelledby="home-sales-title">
+          <div class="home-sales-header">
+            <div>
+              <p class="section-eyebrow">Apple Store</p>
+              <h2 id="home-sales-title">销量排行</h2>
+            </div>
+            <p class="item-meta">按具体型号统计</p>
+          </div>
+          <div id="home-sales-rank" class="home-sales-rank"></div>
+        </section>
       </div>
 
       <div id="checkout-address-modal" class="checkout-address-modal" style="display: none">
@@ -2551,6 +2561,7 @@
       let currentProductId = "";
       let currentProductSkus = [];
       let currentSku = null;
+      let pendingSkuId = null;
       let addressCache = [];
       let currentWatchSelection = {
         material: 0,
@@ -2785,6 +2796,7 @@
           if (result.ok && result.data && result.data.products && Object.keys(result.data.products).length) {
             replaceProductDataWithDbProducts(result.data.products);
             renderDatabaseProductCards();
+            openLinkedProductFromUrl();
             return;
           }
 
@@ -2793,6 +2805,7 @@
           if (refresh.ok && refresh.data && refresh.data.products && Object.keys(refresh.data.products).length) {
             replaceProductDataWithDbProducts(refresh.data.products);
             renderDatabaseProductCards();
+            openLinkedProductFromUrl();
           }
         } catch (_error) {
         }
@@ -2814,24 +2827,6 @@
           const orders = Array.isArray(data.orders) ? data.orders : [];
           localStorage.setItem(getStorageKey("appleStoreCart"), JSON.stringify(cart));
           localStorage.setItem(getStorageKey("appleStoreOrders"), JSON.stringify(orders));
-        } catch (_error) {
-        }
-      }
-
-      async function syncListToDatabase(key, list) {
-        const account = getCurrentAccount();
-        if (!account) {
-          return;
-        }
-
-        try {
-          if (key === getStorageKey("appleStoreCart")) {
-            await apiPut(`/api/user-store/${encodeURIComponent(account)}/cart`, { cart: list });
-            return;
-          }
-          if (key === getStorageKey("appleStoreOrders")) {
-            await apiPut(`/api/user-store/${encodeURIComponent(account)}/orders`, { orders: list });
-          }
         } catch (_error) {
         }
       }
@@ -3123,7 +3118,6 @@
 
       function writeList(key, list) {
         localStorage.setItem(key, JSON.stringify(list));
-        syncListToDatabase(key, list);
       }
 
       function getCurrentSelectionText() {
@@ -3171,6 +3165,13 @@
       }
 
       function findMatchingSku() {
+        if (pendingSkuId && currentProductSkus.length) {
+          const matched = currentProductSkus.find((sku) => Number(sku.id) === Number(pendingSkuId));
+          if (matched) {
+            pendingSkuId = null;
+            return matched;
+          }
+        }
         const selection = getCurrentSelectionText();
         if (!currentProductSkus.length) {
           return null;
@@ -3210,6 +3211,39 @@
         if (checkoutBtn) checkoutBtn.disabled = stock <= 0;
       }
 
+      function activateOptionByText(containerId, text) {
+        const value = String(text || "").trim();
+        if (!value) {
+          return;
+        }
+        const container = document.getElementById(containerId);
+        if (!container) {
+          return;
+        }
+        const boxes = Array.from(container.querySelectorAll(".storage-box"));
+        const matched = boxes.find((box) => {
+          const capacity = box.querySelector(".capacity");
+          return capacity && capacity.innerText.trim() === value;
+        });
+        if (!matched) {
+          return;
+        }
+        boxes.forEach((box) => box.classList.remove("active"));
+        matched.classList.add("active");
+      }
+
+      function applySkuSelectionToOptions(sku) {
+        if (!sku) {
+          return;
+        }
+        activateOptionByText("dynamic-color-options", sku.colorName);
+        activateOptionByText("dynamic-spec-options", sku.specName);
+        activateOptionByText("dynamic-connection-options", sku.connectionName);
+        if (sku.image) {
+          document.getElementById("large-product-image").src = sku.image;
+        }
+      }
+
       async function loadCurrentProductSkus() {
         currentProductSkus = [];
         currentSku = null;
@@ -3231,6 +3265,10 @@
           }
         } catch (_error) {
           currentProductSkus = [];
+        }
+        if (pendingSkuId && currentProductSkus.length) {
+          const linkedSku = currentProductSkus.find((sku) => Number(sku.id) === Number(pendingSkuId));
+          applySkuSelectionToOptions(linkedSku);
         }
         updateCurrentSkuState();
       }
@@ -3744,6 +3782,76 @@
         }
       }
 
+      function buildProductLink(item) {
+        const params = new URLSearchParams();
+        if (item.category) {
+          params.set("tab", item.category);
+        }
+        if (item.productId) {
+          params.set("product", item.productId);
+        }
+        if (item.skuId) {
+          params.set("sku", item.skuId);
+        }
+        return `index.html?${params.toString()}`;
+      }
+
+      function renderHomeSalesRank(products) {
+        const listEl = document.getElementById("home-sales-rank");
+        if (!listEl) {
+          return;
+        }
+
+        if (!Array.isArray(products) || !products.length) {
+          listEl.innerHTML = '<p class="empty-tip">暂无销量数据。</p>';
+          return;
+        }
+
+        listEl.innerHTML = products
+          .map((item) => {
+            const image = escapeHtml(item.image || "../images/Apple-Logo.png");
+            const name = escapeHtml(item.name || item.productId);
+            const skuText = escapeHtml(item.skuDescription || item.skuCode || "默认型号");
+            const productId = escapeHtml(item.productId || "");
+            const skuId = Number(item.skuId || 0);
+            const buyUrl = escapeHtml(buildProductLink(item));
+            return `
+              <article class="home-sales-card">
+                <a class="home-sales-media" href="${buyUrl}" aria-label="查看 ${name}">
+                  <span>${item.rank || "-"}</span>
+                  <img src="${image}" alt="${name}" />
+                </a>
+                <div class="home-sales-copy">
+                  <p class="item-title">${name}</p>
+                  <p class="item-meta">${skuText}</p>
+                  <p class="item-meta">销量 ${item.totalSales || 0} · RMB ${item.price || 0} · 库存 ${item.stock || 0}</p>
+                </div>
+                <a class="buy-btn" href="${buyUrl}">购买</a>
+              </article>
+            `;
+          })
+          .join("");
+      }
+
+      async function loadHomeSalesRank() {
+        const listEl = document.getElementById("home-sales-rank");
+        if (!listEl) {
+          return;
+        }
+
+        listEl.innerHTML = '<p class="empty-tip">正在加载销量排行...</p>';
+        try {
+          const { ok, data } = await apiGet("/api/products/sales-rank");
+          if (!ok) {
+            renderHomeSalesRank([]);
+            return;
+          }
+          renderHomeSalesRank(data.products || []);
+        } catch (_error) {
+          renderHomeSalesRank([]);
+        }
+      }
+
       async function removeCartItem(index) {
         const key = getStorageKey("appleStoreCart");
         const cartItems = readList(key);
@@ -3809,6 +3917,7 @@
           if (Array.isArray(data.orders)) {
             localStorage.setItem(getStorageKey("appleStoreOrders"), JSON.stringify(data.orders));
           }
+          await loadCurrentProductSkus();
           alert(data.message || "支付成功，订单已生成。");
           openOrderPage();
         } catch (_error) {
@@ -3884,6 +3993,7 @@
           if (Array.isArray(data.orders)) {
             localStorage.setItem(getStorageKey("appleStoreOrders"), JSON.stringify(data.orders));
           }
+          await loadCurrentProductSkus();
           alert("支付成功！你可以在“查看订单”中查看订单记录。");
           openOrderPage();
         } catch (_error) {
@@ -3914,6 +4024,7 @@
         if (!data) {
           return;
         }
+        hideAllMainPages();
         currentCategory = data.category;
         currentProductId = productId;
         currentProductSkus = [];
@@ -4092,6 +4203,24 @@
         updateCommentDraftHint();
         window.scrollTo(0, 0); 
       }
+
+      function openLinkedProductFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const productId = params.get("product");
+        if (!productId || !productData[productId]) {
+          return;
+        }
+        const skuId = Number(params.get("sku") || 0);
+        pendingSkuId = Number.isInteger(skuId) && skuId > 0 ? skuId : null;
+        buyProduct(productId);
+      }
+
+      function openRankedProduct(productId, skuId) {
+        const normalizedSkuId = Number(skuId || 0);
+        pendingSkuId = Number.isInteger(normalizedSkuId) && normalizedSkuId > 0 ? normalizedSkuId : null;
+        buyProduct(productId);
+      }
+
       function selectPurchaseColor(clickedBox, fileName) {
         document.getElementById("large-product-image").src =
           `../images/${fileName}`;
@@ -4461,10 +4590,12 @@
         }
 
         runProductSearch();
+        loadHomeSalesRank();
 
         (async () => {
           await ensureProductCatalogInDatabase();
           await loadUserStoreFromDatabase();
+          openLinkedProductFromUrl();
         })();
       };
 

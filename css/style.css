@@ -585,6 +585,96 @@ body {
   margin-top: 14px;
 }
 
+.home-sales-section {
+  max-width: 1180px;
+  margin: 42px auto 72px;
+  padding: 0 22px;
+}
+
+.home-sales-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.section-eyebrow {
+  margin: 0 0 4px;
+  color: #6e6e73;
+  font-size: 13px;
+}
+
+.home-sales-header h2 {
+  margin: 0;
+  color: #1d1d1f;
+  font-size: 28px;
+}
+
+.home-sales-rank {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.home-sales-card {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr) 104px;
+  gap: 14px;
+  align-items: center;
+  min-height: 132px;
+  padding: 14px;
+  border: 1px solid #e7e7ea;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.home-sales-media {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 104px;
+  border-radius: 8px;
+  background: #f5f5f7;
+  text-decoration: none;
+}
+
+.home-sales-media span {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #1d1d1f;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.home-sales-media img {
+  width: 100%;
+  max-width: 92px;
+  height: 78px;
+  object-fit: contain;
+}
+
+.home-sales-copy {
+  min-width: 0;
+}
+
+.home-sales-copy .item-title,
+.home-sales-copy .item-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-sales-card .buy-btn {
+  width: 100%;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
 .admin-product-card {
   padding: 14px;
 }
@@ -607,7 +697,7 @@ body {
 
 .admin-sku-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) 100px 90px 96px auto;
+  grid-template-columns: minmax(180px, 1fr) 100px 90px 96px 88px;
   gap: 8px;
   padding: 8px;
   border-radius: 8px;
@@ -615,6 +705,33 @@ body {
   color: #1d1d1f;
   font-size: 13px;
   align-items: center;
+}
+
+.admin-stock-value {
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+.admin-stock-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 38px);
+  gap: 6px;
+}
+
+.admin-stock-actions button {
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 8px;
+  background: #1d1d1f;
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.admin-stock-actions button:hover {
+  background: #333336;
 }
 
 .admin-sku-row span,
@@ -1410,6 +1527,8 @@ body {
   .admin-summary,
   .admin-product-form,
   .admin-variant-grid,
+  .home-sales-rank,
+  .home-sales-card,
   .admin-sku-row {
     grid-template-columns: 1fr;
   }
@@ -1419,6 +1538,15 @@ body {
   .admin-product-head,
   .admin-sku-row {
     align-items: flex-start;
+  }
+
+  .home-sales-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .home-sales-card {
+    justify-items: stretch;
   }
 
   .admin-header,
