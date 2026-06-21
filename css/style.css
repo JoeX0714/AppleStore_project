@@ -1465,6 +1465,37 @@ body {
 }
 
 @media (max-width: 768px) {
+  .container {
+    max-width: 100%;
+  }
+
+  .nav-list {
+    justify-content: flex-start;
+    gap: 16px;
+    padding: 0 14px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .nav-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-item {
+    flex: 0 0 auto;
+  }
+
+  .nav-item a {
+    white-space: nowrap;
+  }
+
+  .nav-search-form:focus-within #product-search-input,
+  #product-search-input:not(:placeholder-shown) {
+    width: min(128px, 34vw);
+  }
+
   .purchase-container {
     margin: 72px auto 32px;
     padding: 0 18px;
