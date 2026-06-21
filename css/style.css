@@ -1465,6 +1465,55 @@ body {
 }
 
 @media (max-width: 768px) {
+  .purchase-container {
+    margin: 72px auto 32px;
+    padding: 0 18px;
+  }
+
+  .purchase-layout {
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  .purchase-left,
+  .purchase-right {
+    width: 100%;
+    flex: none;
+  }
+
+  .purchase-left {
+    min-height: 300px;
+    padding: 34px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .purchase-left img {
+    width: min(82vw, 380px);
+    max-height: 300px;
+    object-fit: contain;
+  }
+
+  .purchase-title {
+    font-size: 34px;
+    line-height: 1.12;
+  }
+
+  .purchase-price {
+    margin-bottom: 28px;
+  }
+
+  .storage-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .storage-box {
+    min-height: 128px;
+    padding: 18px 12px;
+  }
+
   .address-form,
   .checkout-address-dialog .address-form,
   .admin-summary,
@@ -1474,6 +1523,10 @@ body {
   .home-sales-card,
   .admin-sku-row {
     grid-template-columns: 1fr;
+  }
+
+  .purchase-right .storage-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .admin-header,

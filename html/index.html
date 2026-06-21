@@ -3788,6 +3788,9 @@
             return;
           }
           setProductSearchMessage("");
+          if (window.matchMedia("(max-width: 768px)").matches) {
+            inputEl.value = "";
+          }
           inputEl.blur();
           buyProduct(matched.productId);
         } catch (_error) {
